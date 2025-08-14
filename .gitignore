@@ -48,6 +48,7 @@ tiling-examples/
 # 配置文件（包含敏感信息）
 config.sh.bak
 config.local.sh
+config.sh
 
 # 测试输出
 test_output/
