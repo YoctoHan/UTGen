@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# 虚拟环境
+bin/
+include/
+lib/
+lib64/
+share/
+pyvenv.cfg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 项目特定
+runs/
+test-examples/
+ut-template/
+tiling-examples/
+.cache/
+*.log
+*.bak
+*.tmp
+
+# 配置文件（包含敏感信息）
+config.sh.bak
+config.local.sh
+
+# 测试输出
+test_output/
+validation_report.json
+*.validation.json
+
+# 临时文件
+temp/
+tmp/
+example_source/
+
+# 编译产物
+*.o
+*.out
+*.exe
+test_program
+test_program.cpp
+.venv/
+__pycache__/
+*.pyc
