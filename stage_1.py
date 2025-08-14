@@ -17,7 +17,6 @@ from utils import (
     logger, validate_path
 )
 
-
 def load_fewshot_examples(fewshot_file: str) -> str:
     """
     从文件加载few-shot示例
@@ -47,8 +46,9 @@ def load_fewshot_examples(fewshot_file: str) -> str:
 class TestcasePromptGenerator:
     """测试用例提示词生成器"""
     
-    def __init__(self):
+    def __init__(self, model_caller: ModelCaller):
         self.template = self._load_template()
+        self.model_caller = model_caller
     
     def _load_template(self) -> str:
         """加载提示词模板"""
@@ -64,6 +64,9 @@ class TestcasePromptGenerator:
 ## 目标算子相关信息
 ### 算子完整源码
 {source_code_section}
+
+### 算子特征分析
+{operator_analysis}
 
 ## 生成要求
 
@@ -108,61 +111,50 @@ boundary_min,1,1,1,...
         Returns:
             str: 生成的提示词
         """
-        # 分析算子特征
-        # operator_analysis = self._analyze_operator(operator_name, source_paths)
         
         # 生成源码部分
         source_code_section = self._generate_source_section(source_paths)
-        
+       
+        # 分析算子特征
+        operator_analysis = self._analyze_operator(source_code_section)
+
         # 生成示例部分
         examples_section = self._generate_examples_section(fewshot_content)
-        
+
         # 生成特殊注意事项
-        # special_notes = self._generate_special_notes(operator_name, operator_info)
+        # operator_analysis = self._generate_special_notes(operator_name, operator_info)
         
         # 填充模板
         prompt = self.template.format(
             operator_name=operator_name,
-            # operator_analysis=operator_analysis,
+            operator_analysis=operator_analysis,
             source_code_section=source_code_section,
             examples_section=examples_section,
             # special_notes=special_notes
         )
         return prompt
     
-    def _analyze_operator(self, operator_name: str, source_paths: List[str]) -> str:
+    def _analyze_operator(self, source_code_section: str) -> str:
         """分析算子特征"""
-        analysis = []
         
-        # 基于算子名称分析
-        name_lower = operator_name.lower()
+        system_message = """你是一位资深的AI算子开发专家，精通各类深度学习框架的CANN算子实现。
+        你具备以下专业能力：
+        - 深入理解算子的计算逻辑和优化策略
+        - 熟悉tiling技术在算子性能优化中的应用
+        - 能够准确识别和解释代码中的关键参数含义"""
         
-        if "matmul" in name_lower:
-            analysis.append("- 矩阵乘法运算，需要测试不同的矩阵维度（M, N, K）")
-        if "allgather" in name_lower:
-            analysis.append("- 集合通信操作，需要测试不同的rank数量和数据大小")
-        if "reduce" in name_lower:
-            analysis.append("- 归约操作，需要测试不同的归约方式和数据分布")
-        if "scatter" in name_lower:
-            analysis.append("- 分散操作，需要测试数据分片和分发策略")
-        
-        # 分析源码特征
-        cpp_files = get_cpp_files(source_paths)
-        if cpp_files:
-            for file_path in cpp_files[:3]:  # 只分析前3个文件
-                content = read_file_content(file_path)
-                if "template" in content.lower():
-                    analysis.append("- 使用模板，可能需要测试不同的数据类型")
-                if "async" in content.lower():
-                    analysis.append("- 包含异步操作，需要测试同步和异步场景")
-                if "stream" in content.lower():
-                    analysis.append("- 涉及流操作，需要测试不同的流配置")
-        
-        if not analysis:
-            analysis.append("- 标准算子实现，需要全面的功能和性能测试")
-        
-        return "\n".join(analysis)
-    
+        prompt = f"""请分析以下算子源代码，重点关注tiling相关的实现：
+    源代码：
+    {source_code_section}
+    请做以下分析：
+1. 识别代码中和tiling key相关的代码
+2. 解释每个tiling key的具体含义和作用
+
+输出格式要求：
+- 枚举可能出现的 tiling key，并给出其含义。"""
+        response = self.model_caller.call(prompt, system_message, temperature=0.3)  # 降低temperature以获得更准确的技术分析
+        return response
+
     def _generate_source_section(self, source_paths: List[str]) -> str:
         """生成源码部分"""
         lines = []
@@ -200,32 +192,6 @@ boundary_min,1,1,1,...
         ])
         
         return "\n".join(lines)
-    
-    # def _generate_special_notes(self, operator_name: str, 
-    #                            operator_info: Optional[Dict]) -> str:
-    #     """生成特殊注意事项"""
-    #     notes = []
-        
-    #     # 基于算子名称的特殊注意事项
-    #     name_lower = operator_name.lower()
-        
-    #     if "v2" in name_lower or "v3" in name_lower:
-    #         notes.append("- 这是算子的新版本，可能有性能优化或接口变化")
-        
-    #     if "fp16" in name_lower or "bf16" in name_lower:
-    #         notes.append("- 支持半精度浮点数，需要测试精度相关的场景")
-        
-    #     # 从operator_info中提取额外信息
-    #     if operator_info:
-    #         if operator_info.get("hardware_specific"):
-    #             notes.append("- 硬件相关实现，需要测试不同硬件配置")
-    #         if operator_info.get("experimental"):
-    #             notes.append("- 实验性功能，需要更全面的边界测试")
-        
-    #     if not notes:
-    #         notes.append("- 确保测试参数符合硬件限制和实际使用场景")
-        
-    #     return "\n".join(notes)
 
 
 def parse_csv_response(response: str) -> List[str]:
@@ -361,6 +327,9 @@ def generate_testcase_params(operator_name: str, source_paths: List[str],
     logger.info(f"🎯 开始为{operator_name}算子生成测试参数")
     logger.info("=" * 50)
     
+    # 初始化模型调用器
+    model_caller = ModelCaller(api_key, base_url, model_name, use_cache=True)
+
     # 加载few-shot示例
     logger.info("📚 加载few-shot示例...")
     fewshot_content = load_fewshot_examples(fewshot_file)
@@ -368,7 +337,7 @@ def generate_testcase_params(operator_name: str, source_paths: List[str],
         logger.warning("未能加载few-shot示例，将仅基于源码生成")
     
     # 初始化提示词生成器
-    prompt_generator = TestcasePromptGenerator()
+    prompt_generator = TestcasePromptGenerator(model_caller)
     
     # 生成prompt
     logger.info("📝 生成测试参数生成prompt...")
@@ -379,9 +348,7 @@ def generate_testcase_params(operator_name: str, source_paths: List[str],
     if not save_file_content(prompt, prompt_file):
         logger.warning("prompt保存失败，但继续执行...")
     
-    # 初始化模型调用器
     logger.info("🤖 调用模型生成测试参数...")
-    model_caller = ModelCaller(api_key, base_url, model_name, use_cache=True)
     
     system_message = """你是一个专业的C++测试工程师，专门为算子设计测试参数。
 请根据提供的算子代码和示例，生成全面的测试参数集。
