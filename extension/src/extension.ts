@@ -4,63 +4,63 @@ import { spawn } from 'child_process';
 
 // Util: get configuration values
 function getConfig<T>(key: string, defaultValue: T): T {
-    const config = vscode.workspace.getConfiguration('cannTestcaseGenerator');
-    const value = config.get<T>(key);
-    return (value === undefined ? defaultValue : value);
+	const config = vscode.workspace.getConfiguration('cannTestcaseGenerator');
+	const value = config.get<T>(key);
+	return (value === undefined ? defaultValue : value);
 }
 
 export function activate(context: vscode.ExtensionContext) {
-    const disposable = vscode.commands.registerCommand('cannTestcaseGenerator.open', async () => {
-        const panel = vscode.window.createWebviewPanel(
-            'cannTestcaseGenerator',
-            'CANN 测试用例生成器',
-            vscode.ViewColumn.One,
-            {
-                enableScripts: true,
-                retainContextWhenHidden: true,
-                localResourceRoots: [
-                    vscode.Uri.file(path.join(context.extensionPath, 'media'))
-                ]
-            }
-        );
+	const disposable = vscode.commands.registerCommand('cannTestcaseGenerator.open', async () => {
+		const panel = vscode.window.createWebviewPanel(
+			'cannTestcaseGenerator',
+			'CANN 测试用例生成器',
+			vscode.ViewColumn.One,
+			{
+				enableScripts: true,
+				retainContextWhenHidden: true,
+				localResourceRoots: [
+					vscode.Uri.file(path.join(context.extensionPath, 'media'))
+				]
+			}
+		);
 
-        const mediaUri = vscode.Uri.file(path.join(context.extensionPath, 'media'));
-        const cssUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'ui.css'));
-        const jsUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'ui.js'));
+		const mediaUri = vscode.Uri.file(path.join(context.extensionPath, 'media'));
+		const cssUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'ui.css'));
+		const jsUri = panel.webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'ui.js'));
 
-        panel.webview.html = getWebviewContent(cssUri.toString(), jsUri.toString());
+		panel.webview.html = getWebviewContent(cssUri.toString(), jsUri.toString());
 
-        panel.webview.onDidReceiveMessage(async (message) => {
-            switch (message.type) {
-                case 'pickFile': {
-                    const uris = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
-                    if (uris && uris.length > 0) {
-                        panel.webview.postMessage({ type: 'pickedFile', path: uris[0].fsPath });
-                    }
-                    break;
-                }
-                case 'pickFolder': {
-                    const uris = await vscode.window.showOpenDialog({ canSelectFiles: false, canSelectFolders: true, canSelectMany: true });
-                    if (uris && uris.length > 0) {
-                        panel.webview.postMessage({ type: 'pickedFolder', paths: uris.map(u => u.fsPath) });
-                    }
-                    break;
-                }
-                case 'run': {
-                    runStage1(panel, context, message.payload).catch(err => {
-                        vscode.window.showErrorMessage(String(err));
-                    });
-                    break;
-                }
-            }
-        });
-    });
+		panel.webview.onDidReceiveMessage(async (message) => {
+			switch (message.type) {
+				case 'pickFile': {
+					const uris = await vscode.window.showOpenDialog({ canSelectFiles: true, canSelectFolders: false, canSelectMany: false });
+					if (uris && uris.length > 0) {
+						panel.webview.postMessage({ type: 'pickedFile', path: uris[0].fsPath });
+					}
+					break;
+				}
+				case 'pickFolder': {
+					const uris = await vscode.window.showOpenDialog({ canSelectFiles: false, canSelectFolders: true, canSelectMany: true });
+					if (uris && uris.length > 0) {
+						panel.webview.postMessage({ type: 'pickedFolder', paths: uris.map(u => u.fsPath) });
+					}
+					break;
+				}
+				case 'run': {
+					runStage1(panel, context, message.payload).catch(err => {
+						vscode.window.showErrorMessage(String(err));
+					});
+					break;
+				}
+			}
+		});
+	});
 
-    context.subscriptions.push(disposable);
+	context.subscriptions.push(disposable);
 }
 
 function getWebviewContent(cssHref: string, jsSrc: string): string {
-    return `<!DOCTYPE html>
+	return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -76,43 +76,24 @@ function getWebviewContent(cssHref: string, jsSrc: string): string {
     <h2>基于源码与 Few-shot 的测试用例生成</h2>
     <form id="form">
       <div class="row">
-        <label>算子名称</label>
-        <input id="operatorName" placeholder="如: AllGatherMatmul" />
+        <label>算子名称 <span style="color: red;">*</span></label>
+        <input id="operatorName" placeholder="如: AllGatherMatmul" required />
       </div>
       <div class="row">
-        <label>输出 Excel 文件 (.xlsx)</label>
-        <input id="outputFile" placeholder="绝对路径，或工作区下相对路径" />
-        <button type="button" data-action="pickFile" data-target="outputFile">选择</button>
-      </div>
-      <div class="row">
-        <label>Prompt 文件 (.txt)</label>
-        <input id="promptFile" placeholder="绝对路径，或工作区下相对路径" />
-        <button type="button" data-action="pickFile" data-target="promptFile">选择</button>
+        <label>源码目录 <span style="color: red;">*</span></label>
+        <textarea id="sourcePaths" rows="3" placeholder="算子源码目录路径（支持多个，每行一个）" required></textarea>
+        <button type="button" data-action="pickFolder" data-target="sourcePaths">选择目录</button>
       </div>
       <div class="row">
         <label>Few-shot 示例文件</label>
-        <input id="fewshotFile" placeholder="如: tiling-examples/fewshot_examples.txt" />
-        <button type="button" data-action="pickFile" data-target="fewshotFile">选择</button>
-      </div>
-      <div class="row">
-        <label>API Key</label>
-        <input id="apiKey" type="password" />
-      </div>
-      <div class="row">
-        <label>Base URL</label>
-        <input id="baseUrl" placeholder="如: https://api.com/v1" />
-      </div>
-      <div class="row">
-        <label>Model Name</label>
-        <input id="modelName" placeholder="模型名称" />
-      </div>
-      <div class="row">
-        <label>源码目录(可多选)</label>
-        <textarea id="sourcePaths" rows="2" placeholder="多行/逗号分隔"></textarea>
-        <button type="button" data-action="pickFolder" data-target="sourcePaths">选择</button>
+        <input id="fewshotFile" placeholder="默认: tiling-examples/fewshot_examples.txt" />
+        <button type="button" data-action="pickFile" data-target="fewshotFile">选择文件</button>
       </div>
       <div class="row">
         <button id="run" type="submit">开始生成</button>
+      </div>
+      <div class="row" style="margin-top: 10px; font-size: 12px; color: #666;">
+        <p>💡 提示：API配置请在 config.sh 中设置</p>
       </div>
       <div id="status" class="status"></div>
       <pre id="log" class="log"></pre>
@@ -124,67 +105,150 @@ function getWebviewContent(cssHref: string, jsSrc: string): string {
 }
 
 type RunPayload = {
-    operatorName: string;
-    outputFile: string;
-    promptFile: string;
-    fewshotFile: string;
-    apiKey: string;
-    baseUrl: string;
-    modelName: string;
-    sourcePaths: string[];
+	operatorName: string;
+	fewshotFile: string;
+	sourcePaths: string[];
 };
 
 async function runStage1(panel: vscode.WebviewPanel, context: vscode.ExtensionContext, payload: RunPayload): Promise<void> {
-    const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    const pythonCmd = getConfig<string>('pythonPath', 'python3');
-    const defaultScript = getConfig<string>('defaultScriptPath', path.join(workspaceFolder || context.extensionPath, 'stage_1.py'));
+	const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+	
+	// 输出调试信息
+	panel.webview.postMessage({ type: 'log', text: `📂 工作区目录: ${workspaceFolder || '未设置'}\n` });
+	panel.webview.postMessage({ type: 'log', text: `📂 扩展目录: ${context.extensionPath}\n` });
+	
+	// 配置项：是否使用虚拟环境
+	const useVenv = getConfig<boolean>('useVirtualEnv', true);
+	const venvPath = getConfig<string>('venvPath', '.venv');
+	
+	// 计算脚本路径：优先使用设置项；若为空则使用扩展父目录的 entrypoint.sh
+	const extensionParentDir = path.dirname(context.extensionPath);
+	const configuredScriptPath = getConfig<string>('defaultScriptPath', '');
+	const resolvedConfiguredScript = configuredScriptPath && configuredScriptPath.trim() !== ''
+		? toAbsolute(configuredScriptPath, extensionParentDir)
+		: '';
+	const autoDefaultScript = path.join(extensionParentDir, 'entrypoint.sh');
+	const selectedDefaultScript = resolvedConfiguredScript || autoDefaultScript;
+	let scriptPath = (payload as any)?.scriptPath;
+	if (!scriptPath || String(scriptPath).trim() === '') {
+		scriptPath = selectedDefaultScript;
+	}
 
-    // Resolve script path
-    const scriptPath = payload && (payload as any).scriptPath ? (payload as any).scriptPath : defaultScript;
+	panel.webview.postMessage({ type: 'log', text: `📜 执行脚本: ${scriptPath}\n` });
 
-    const args: string[] = [
-        scriptPath,
-        payload.operatorName,
-        toAbsolute(payload.outputFile, workspaceFolder),
-        toAbsolute(payload.promptFile, workspaceFolder),
-        toAbsolute(payload.fewshotFile, workspaceFolder),
-        payload.apiKey,
-        payload.baseUrl,
-        payload.modelName,
-        ...payload.sourcePaths.map(p => toAbsolute(p, workspaceFolder))
-    ];
+	// 校验脚本是否存在
+	const fs = require('fs');
+	if (!fs.existsSync(scriptPath)) {
+		panel.webview.postMessage({ type: 'status', text: '失败 ❌' });
+		panel.webview.postMessage({ type: 'log', text: `❌ 找不到脚本: ${scriptPath}\n` });
+		vscode.window.showErrorMessage(`找不到脚本: ${scriptPath}`);
+		return;
+	}
 
-    panel.webview.postMessage({ type: 'status', text: '开始执行 stage_1.py ...' });
+	// 构建命令
+	let command: string;
+	let commandArgs: string[] = [];
+	
+	if (useVenv) {
+		// 激活虚拟环境并执行脚本
+		const isWindows = process.platform === 'win32';
+		
+		// 优先使用扩展父目录（utgen-v2）的虚拟环境，其次是工作区的虚拟环境
+		const possibleVenvPaths = [
+			path.join(extensionParentDir, venvPath),  // utgen-v2/.venv
+			workspaceFolder ? path.join(workspaceFolder, venvPath) : null  // 工作区/.venv
+		].filter((p: string | null) => p !== null);
+		
+		let activateScript = '';
+		let venvExists = false;
+		
+		for (const venvDir of possibleVenvPaths as string[]) {
+			const testScript = isWindows 
+				? path.join(venvDir, 'Scripts', 'activate.bat')
+				: path.join(venvDir, 'bin', 'activate');
+			
+			if (fs.existsSync(testScript)) {
+				activateScript = testScript;
+				venvExists = true;
+				panel.webview.postMessage({ type: 'log', text: `✅ 找到虚拟环境: ${venvDir}\n` });
+				break;
+			}
+		}
+		
+		if (isWindows) {
+			// Windows: 使用 cmd.exe
+			command = 'cmd.exe';
+			const cdCmd = workspaceFolder ? `cd /d "${workspaceFolder}" && ` : '';
+			if (venvExists) {
+				commandArgs = ['/c', `"${activateScript}" && ${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+			} else {
+				commandArgs = ['/c', `${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+			}
+		} else {
+			// macOS/Linux: 使用 bash
+			command = '/bin/bash';
+			const cdCmd = workspaceFolder ? `cd "${workspaceFolder}" && ` : '';
+			if (venvExists) {
+				commandArgs = ['-c', `source "${activateScript}" && ${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+			} else {
+				// 如果虚拟环境不存在，直接执行脚本（脚本内部会尝试激活）
+				commandArgs = ['-c', `${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+			}
+		}
+		
+		if (!venvExists) {
+			panel.webview.postMessage({ type: 'log', text: `⚠️ 未找到虚拟环境，检查过以下位置:\n` });
+			for (const venvDir of possibleVenvPaths as string[]) {
+				panel.webview.postMessage({ type: 'log', text: `  - ${venvDir}\n` });
+			}
+			panel.webview.postMessage({ type: 'log', text: `将尝试使用系统Python环境...\n` });
+		}
+	} else {
+		// 直接执行脚本
+		command = scriptPath;
+		commandArgs = [
+			payload.operatorName,
+			...(payload.fewshotFile ? [toAbsolute(payload.fewshotFile, workspaceFolder)] : []),
+			...payload.sourcePaths.map(p => toAbsolute(p, workspaceFolder))
+		];
+	}
 
-    const proc = spawn(pythonCmd, args, { cwd: workspaceFolder || context.extensionPath, shell: process.platform === 'win32' });
+	panel.webview.postMessage({ type: 'status', text: '开始执行脚本...' });
 
-    proc.stdout.on('data', (data: Buffer) => {
-        panel.webview.postMessage({ type: 'log', text: data.toString() });
-    });
+	// 使用扩展父目录作为工作目录，这样脚本可以找到config.sh等文件
+	const proc = spawn(command, commandArgs, {
+		cwd: extensionParentDir,  // utgen-v2 目录
+		shell: false,
+		env: { ...process.env }
+	});
 
-    proc.stderr.on('data', (data: Buffer) => {
-        panel.webview.postMessage({ type: 'log', text: data.toString() });
-    });
+	proc.stdout.on('data', (data: Buffer) => {
+		panel.webview.postMessage({ type: 'log', text: data.toString() });
+	});
 
-    await new Promise<void>((resolve) => {
-        proc.on('close', (code) => {
-            if (code === 0) {
-                panel.webview.postMessage({ type: 'status', text: '完成 ✅' });
-                vscode.window.showInformationMessage('测试参数生成完成');
-            } else {
-                panel.webview.postMessage({ type: 'status', text: `失败，退出码 ${code}` });
-                vscode.window.showErrorMessage(`stage_1.py 运行失败，退出码 ${code}`);
-            }
-            resolve();
-        });
-    });
+	proc.stderr.on('data', (data: Buffer) => {
+		panel.webview.postMessage({ type: 'log', text: data.toString() });
+	});
+
+	await new Promise<void>((resolve) => {
+		proc.on('close', (code) => {
+			if (code === 0) {
+				panel.webview.postMessage({ type: 'status', text: '完成 ✅' });
+				vscode.window.showInformationMessage('测试用例生成完成');
+			} else {
+				panel.webview.postMessage({ type: 'status', text: `失败，退出码 ${code}` });
+				vscode.window.showErrorMessage(`脚本运行失败，退出码 ${code}`);
+			}
+			resolve();
+		});
+	});
 }
 
 function toAbsolute(p: string, workspaceFolder?: string): string {
-    if (!p) return p;
-    if (path.isAbsolute(p)) return p;
-    if (workspaceFolder) return path.join(workspaceFolder, p);
-    return path.resolve(p);
+	if (!p) return p;
+	if (path.isAbsolute(p)) return p;
+	if (workspaceFolder) return path.join(workspaceFolder, p);
+	return path.resolve(p);
 }
 
 export function deactivate() {}

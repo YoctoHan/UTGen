@@ -53,17 +53,26 @@
 
   form.addEventListener('submit', (e) => {
     e.preventDefault();
+    const operatorName = document.getElementById('operatorName').value.trim();
+    const sourcePaths = (document.getElementById('sourcePaths').value || '')
+        .split(/\n|,/).map(s => s.trim()).filter(Boolean);
+    
+    // 验证必填字段
+    if (!operatorName) {
+      alert('请输入算子名称');
+      return;
+    }
+    if (sourcePaths.length === 0) {
+      alert('请至少指定一个源码目录');
+      return;
+    }
+    
     const payload = {
-      operatorName: document.getElementById('operatorName').value.trim(),
-      outputFile: document.getElementById('outputFile').value.trim(),
-      promptFile: document.getElementById('promptFile').value.trim(),
+      operatorName: operatorName,
       fewshotFile: document.getElementById('fewshotFile').value.trim(),
-      apiKey: document.getElementById('apiKey').value.trim(),
-      baseUrl: document.getElementById('baseUrl').value.trim(),
-      modelName: document.getElementById('modelName').value.trim(),
-      sourcePaths: (document.getElementById('sourcePaths').value || '')
-        .split(/\n|,/).map(s => s.trim()).filter(Boolean)
+      sourcePaths: sourcePaths
     };
+    
     logEl.textContent = '';
     setStatus('准备执行 ...');
     vscode.postMessage({ type: 'run', payload });

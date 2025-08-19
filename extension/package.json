@@ -31,8 +31,18 @@
         },
         "cannTestcaseGenerator.defaultScriptPath": {
           "type": "string",
-          "default": "${workspaceFolder}/stage_1.py",
-          "description": "stage_1.py 的默认路径"
+          "default": "",
+          "description": "入口脚本路径（留空则自动使用扩展目录的 entrypoint.sh）"
+        },
+        "cannTestcaseGenerator.useVirtualEnv": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否使用虚拟环境"
+        },
+        "cannTestcaseGenerator.venvPath": {
+          "type": "string",
+          "default": ".venv",
+          "description": "虚拟环境目录路径（相对于工作区根目录）"
         }
       }
     }

@@ -1,25 +1,81 @@
-# =============================================================================
-# 配置区域 - 根据需要修改
-# =============================================================================
-OPERATOR_NAME=AllGatherMatmul
-OPERATOR_PATH=/Users/edy/Desktop/华为/canndev-utgen/ops/built-in/op_tiling/runtime/all_gather_matmul
+#!/bin/bash
 
 # =============================================================================
-# 执行区域 - 选择要执行的操作
+# VSCode Extension 入口脚本
 # =============================================================================
 
-# 选项1: 仅生成单元测试 
-# ./workflow.sh $OPERATOR_NAME $OPERATOR_PATH
+# 获取脚本目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 选项2: 仅生成测试参数
-# ./workflow.sh gen-params $OPERATOR_NAME $OPERATOR_PATH
+# 检查参数数量
+if [ $# -lt 2 ]; then
+    echo "错误: 参数不足"
+    echo "用法: $0 <算子名称> [Few-shot文件] <源码路径...>"
+    echo "示例: $0 AllGatherMatmul /path/to/source"
+    echo "     $0 AllGatherMatmul fewshot.txt /path/to/source1 /path/to/source2"
+    exit 1
+fi
 
-# 选项3: 完整流程 (先生成参数，再生成单测)
-./workflow.sh stage-1 $OPERATOR_NAME $OPERATOR_PATH
+# 获取算子名称
+OPERATOR_NAME="$1"
+shift
 
-# 选项4: 查看配置
-# ./workflow.sh --config
+# 检查第二个参数是否是few-shot文件
+FEWSHOT_FILE=""
+if [ $# -gt 1 ] && [[ "$1" == *.txt || "$1" == *.json ]]; then
+    FEWSHOT_FILE="$1"
+    shift
+fi
 
-# 选项5: 查看帮助
-# ./workflow.sh --help
+# 剩余参数都是源码路径
+SOURCE_PATHS=("$@")
+
+# 尝试激活虚拟环境
+VENV_FOUND=false
+
+# 优先使用脚本所在目录的虚拟环境
+if [ -f "$SCRIPT_DIR/.venv/bin/activate" ]; then
+    echo "🔄 激活项目虚拟环境: $SCRIPT_DIR/.venv"
+    source "$SCRIPT_DIR/.venv/bin/activate"
+    VENV_FOUND=true
+# 尝试父目录的虚拟环境（如果脚本在子目录中）
+elif [ -f "$SCRIPT_DIR/../.venv/bin/activate" ]; then
+    echo "🔄 激活父目录虚拟环境: $SCRIPT_DIR/../.venv"
+    source "$SCRIPT_DIR/../.venv/bin/activate"
+    VENV_FOUND=true
+# 检查当前工作目录的虚拟环境
+elif [ -f "$(pwd)/.venv/bin/activate" ]; then
+    echo "🔄 激活当前目录虚拟环境: $(pwd)/.venv"
+    source "$(pwd)/.venv/bin/activate"
+    VENV_FOUND=true
+fi
+
+if [ "$VENV_FOUND" = true ]; then
+    echo "✅ 虚拟环境已激活"
+    echo "📍 Python: $(which python)"
+    echo "📦 Pip: $(which pip)"
+else
+    echo "⚠️  未找到虚拟环境，使用系统Python"
+    echo "📍 Python: $(which python3 || which python)"
+fi
+
+# 加载config.sh中的配置
+source "$SCRIPT_DIR/config.sh"
+
+# 如果提供了few-shot文件，覆盖默认配置
+if [ -n "$FEWSHOT_FILE" ]; then
+    export FEWSHOT_EXAMPLES_FILE="$FEWSHOT_FILE"
+fi
+
+# 执行完整流程
+echo "🚀 开始执行测试用例生成流程"
+echo "算子名称: $OPERATOR_NAME"
+echo "源码路径: ${SOURCE_PATHS[@]}"
+echo "API配置: ${BASE_URL} (${MODEL_NAME})"
+echo "Few-shot: ${FEWSHOT_EXAMPLES_FILE}"
+echo "=================================="
+
+# 调用 workflow.sh 执行完整流程
+cd "$SCRIPT_DIR"
+./workflow.sh gen-all "$OPERATOR_NAME" "${SOURCE_PATHS[@]}"
 

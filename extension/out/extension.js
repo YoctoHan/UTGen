@@ -101,43 +101,24 @@ function getWebviewContent(cssHref, jsSrc) {
     <h2>基于源码与 Few-shot 的测试用例生成</h2>
     <form id="form">
       <div class="row">
-        <label>算子名称</label>
-        <input id="operatorName" placeholder="如: AllGatherMatmul" />
+        <label>算子名称 <span style="color: red;">*</span></label>
+        <input id="operatorName" placeholder="如: AllGatherMatmul" required />
       </div>
       <div class="row">
-        <label>输出 Excel 文件 (.xlsx)</label>
-        <input id="outputFile" placeholder="绝对路径，或工作区下相对路径" />
-        <button type="button" data-action="pickFile" data-target="outputFile">选择</button>
-      </div>
-      <div class="row">
-        <label>Prompt 文件 (.txt)</label>
-        <input id="promptFile" placeholder="绝对路径，或工作区下相对路径" />
-        <button type="button" data-action="pickFile" data-target="promptFile">选择</button>
+        <label>源码目录 <span style="color: red;">*</span></label>
+        <textarea id="sourcePaths" rows="3" placeholder="算子源码目录路径（支持多个，每行一个）" required></textarea>
+        <button type="button" data-action="pickFolder" data-target="sourcePaths">选择目录</button>
       </div>
       <div class="row">
         <label>Few-shot 示例文件</label>
-        <input id="fewshotFile" placeholder="如: tiling-examples/fewshot_examples.txt" />
-        <button type="button" data-action="pickFile" data-target="fewshotFile">选择</button>
-      </div>
-      <div class="row">
-        <label>API Key</label>
-        <input id="apiKey" type="password" />
-      </div>
-      <div class="row">
-        <label>Base URL</label>
-        <input id="baseUrl" placeholder="如: https://api.com/v1" />
-      </div>
-      <div class="row">
-        <label>Model Name</label>
-        <input id="modelName" placeholder="模型名称" />
-      </div>
-      <div class="row">
-        <label>源码目录(可多选)</label>
-        <textarea id="sourcePaths" rows="2" placeholder="多行/逗号分隔"></textarea>
-        <button type="button" data-action="pickFolder" data-target="sourcePaths">选择</button>
+        <input id="fewshotFile" placeholder="默认: tiling-examples/fewshot_examples.txt" />
+        <button type="button" data-action="pickFile" data-target="fewshotFile">选择文件</button>
       </div>
       <div class="row">
         <button id="run" type="submit">开始生成</button>
+      </div>
+      <div class="row" style="margin-top: 10px; font-size: 12px; color: #666;">
+        <p>💡 提示：API配置请在 config.sh 中设置</p>
       </div>
       <div id="status" class="status"></div>
       <pre id="log" class="log"></pre>
@@ -149,23 +130,104 @@ function getWebviewContent(cssHref, jsSrc) {
 }
 async function runStage1(panel, context, payload) {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-    const pythonCmd = getConfig('pythonPath', 'python3');
-    const defaultScript = getConfig('defaultScriptPath', path.join(workspaceFolder || context.extensionPath, 'stage_1.py'));
-    // Resolve script path
-    const scriptPath = payload && payload.scriptPath ? payload.scriptPath : defaultScript;
-    const args = [
-        scriptPath,
-        payload.operatorName,
-        toAbsolute(payload.outputFile, workspaceFolder),
-        toAbsolute(payload.promptFile, workspaceFolder),
-        toAbsolute(payload.fewshotFile, workspaceFolder),
-        payload.apiKey,
-        payload.baseUrl,
-        payload.modelName,
-        ...payload.sourcePaths.map(p => toAbsolute(p, workspaceFolder))
-    ];
-    panel.webview.postMessage({ type: 'status', text: '开始执行 stage_1.py ...' });
-    const proc = (0, child_process_1.spawn)(pythonCmd, args, { cwd: workspaceFolder || context.extensionPath, shell: process.platform === 'win32' });
+    // 输出调试信息
+    panel.webview.postMessage({ type: 'log', text: `📂 工作区目录: ${workspaceFolder || '未设置'}\n` });
+    panel.webview.postMessage({ type: 'log', text: `📂 扩展目录: ${context.extensionPath}\n` });
+    // 配置项：是否使用虚拟环境
+    const useVenv = getConfig('useVirtualEnv', true);
+    const venvPath = getConfig('venvPath', '.venv');
+    // 计算脚本路径：优先使用设置项；若为空则使用扩展父目录的 entrypoint.sh
+    const extensionParentDir = path.dirname(context.extensionPath);
+    const configuredScriptPath = getConfig('defaultScriptPath', '');
+    const resolvedConfiguredScript = configuredScriptPath && configuredScriptPath.trim() !== ''
+        ? toAbsolute(configuredScriptPath, extensionParentDir)
+        : '';
+    const autoDefaultScript = path.join(extensionParentDir, 'entrypoint.sh');
+    const selectedDefaultScript = resolvedConfiguredScript || autoDefaultScript;
+    let scriptPath = payload?.scriptPath;
+    if (!scriptPath || String(scriptPath).trim() === '') {
+        scriptPath = selectedDefaultScript;
+    }
+    panel.webview.postMessage({ type: 'log', text: `📜 执行脚本: ${scriptPath}\n` });
+    // 校验脚本是否存在
+    const fs = require('fs');
+    if (!fs.existsSync(scriptPath)) {
+        panel.webview.postMessage({ type: 'status', text: '失败 ❌' });
+        panel.webview.postMessage({ type: 'log', text: `❌ 找不到脚本: ${scriptPath}\n` });
+        vscode.window.showErrorMessage(`找不到脚本: ${scriptPath}`);
+        return;
+    }
+    // 构建命令
+    let command;
+    let commandArgs = [];
+    if (useVenv) {
+        // 激活虚拟环境并执行脚本
+        const isWindows = process.platform === 'win32';
+        // 优先使用扩展父目录（utgen-v2）的虚拟环境，其次是工作区的虚拟环境
+        const possibleVenvPaths = [
+            path.join(extensionParentDir, venvPath), // utgen-v2/.venv
+            workspaceFolder ? path.join(workspaceFolder, venvPath) : null // 工作区/.venv
+        ].filter((p) => p !== null);
+        let activateScript = '';
+        let venvExists = false;
+        for (const venvDir of possibleVenvPaths) {
+            const testScript = isWindows
+                ? path.join(venvDir, 'Scripts', 'activate.bat')
+                : path.join(venvDir, 'bin', 'activate');
+            if (fs.existsSync(testScript)) {
+                activateScript = testScript;
+                venvExists = true;
+                panel.webview.postMessage({ type: 'log', text: `✅ 找到虚拟环境: ${venvDir}\n` });
+                break;
+            }
+        }
+        if (isWindows) {
+            // Windows: 使用 cmd.exe
+            command = 'cmd.exe';
+            const cdCmd = workspaceFolder ? `cd /d "${workspaceFolder}" && ` : '';
+            if (venvExists) {
+                commandArgs = ['/c', `"${activateScript}" && ${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+            }
+            else {
+                commandArgs = ['/c', `${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+            }
+        }
+        else {
+            // macOS/Linux: 使用 bash
+            command = '/bin/bash';
+            const cdCmd = workspaceFolder ? `cd "${workspaceFolder}" && ` : '';
+            if (venvExists) {
+                commandArgs = ['-c', `source "${activateScript}" && ${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+            }
+            else {
+                // 如果虚拟环境不存在，直接执行脚本（脚本内部会尝试激活）
+                commandArgs = ['-c', `${cdCmd}"${scriptPath}" "${payload.operatorName}" ${payload.fewshotFile ? `"${toAbsolute(payload.fewshotFile, workspaceFolder)}"` : ''} ${payload.sourcePaths.map(p => `"${toAbsolute(p, workspaceFolder)}"`).join(' ')}`];
+            }
+        }
+        if (!venvExists) {
+            panel.webview.postMessage({ type: 'log', text: `⚠️ 未找到虚拟环境，检查过以下位置:\n` });
+            for (const venvDir of possibleVenvPaths) {
+                panel.webview.postMessage({ type: 'log', text: `  - ${venvDir}\n` });
+            }
+            panel.webview.postMessage({ type: 'log', text: `将尝试使用系统Python环境...\n` });
+        }
+    }
+    else {
+        // 直接执行脚本
+        command = scriptPath;
+        commandArgs = [
+            payload.operatorName,
+            ...(payload.fewshotFile ? [toAbsolute(payload.fewshotFile, workspaceFolder)] : []),
+            ...payload.sourcePaths.map(p => toAbsolute(p, workspaceFolder))
+        ];
+    }
+    panel.webview.postMessage({ type: 'status', text: '开始执行脚本...' });
+    // 使用扩展父目录作为工作目录，这样脚本可以找到config.sh等文件
+    const proc = (0, child_process_1.spawn)(command, commandArgs, {
+        cwd: extensionParentDir, // utgen-v2 目录
+        shell: false,
+        env: { ...process.env }
+    });
     proc.stdout.on('data', (data) => {
         panel.webview.postMessage({ type: 'log', text: data.toString() });
     });
@@ -176,11 +238,11 @@ async function runStage1(panel, context, payload) {
         proc.on('close', (code) => {
             if (code === 0) {
                 panel.webview.postMessage({ type: 'status', text: '完成 ✅' });
-                vscode.window.showInformationMessage('测试参数生成完成');
+                vscode.window.showInformationMessage('测试用例生成完成');
             }
             else {
                 panel.webview.postMessage({ type: 'status', text: `失败，退出码 ${code}` });
-                vscode.window.showErrorMessage(`stage_1.py 运行失败，退出码 ${code}`);
+                vscode.window.showErrorMessage(`脚本运行失败，退出码 ${code}`);
             }
             resolve();
         });
