@@ -1,0 +1,51 @@
+{
+  "name": "cann-testcase-generator",
+  "displayName": "CANN 测试用例生成器",
+  "description": "基于 few-shot 与源码分析生成算子测试参数的 VS Code 扩展，封装运行 stage_1.py 并提供可视化界面。",
+  "publisher": "local",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.88.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:cannTestcaseGenerator.open"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "cannTestcaseGenerator.open",
+        "title": "CANN 测试用例生成器: 打开面板"
+      }
+    ],
+    "configuration": {
+      "title": "CANN 测试用例生成器",
+      "properties": {
+        "cannTestcaseGenerator.pythonPath": {
+          "type": "string",
+          "default": "python3",
+          "description": "Python 可执行文件路径（如 python 或 python3）"
+        },
+        "cannTestcaseGenerator.defaultScriptPath": {
+          "type": "string",
+          "default": "${workspaceFolder}/stage_1.py",
+          "description": "stage_1.py 的默认路径"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "vscode:prepublish": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^18.19.0",
+    "@types/vscode": "^1.88.0",
+    "typescript": "^5.4.0"
+  }
+}
+

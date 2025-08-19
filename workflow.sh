@@ -56,7 +56,7 @@ show_help() {
 输出目录:
   runs/YYYYMMDD_HHMMSS_<算子名称>[_testcase]/
     ├── test_<算子名称>_tiling.cpp     # 生成的单测文件
-    ├── test_params_<算子名称>.csv     # 测试参数文件
+    ├── test_params_<算子名称>.xlsx     # 测试参数文件
     ├── prompt_*.txt                   # 使用的prompt
     └── *.log                          # 运行日志
 
@@ -85,7 +85,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     mkdir -p "$run_dir"
     
     # 定义文件路径
-    local output_file="$run_dir/test_params_${operator_lower}.csv"
+    local output_file="$run_dir/test_params_${operator_lower}.xlsx"
     local prompt_file="$run_dir/prompt_testcase_${operator_lower}.txt"
     local log_file="$run_dir/testcase_generation.log"
     

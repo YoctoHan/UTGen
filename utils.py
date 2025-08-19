@@ -649,7 +649,7 @@ class ModelCaller:
                     temperature=temperature,
                     max_tokens=max_tokens,
                     stream=True,
-                    timeout=600
+                    timeout=6000
                 )
                 
                 # 收集流式响应
