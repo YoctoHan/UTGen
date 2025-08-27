@@ -7,17 +7,23 @@ Prompt生成器 - 面向过程版本
 
 import sys
 from pathlib import Path
-from utils import get_cpp_files, read_file_content, read_csv_content, save_file_content
+from utils import (
+    get_cpp_files,
+    read_file_content,
+    read_csv_content,
+    read_excel_content,
+    save_file_content,
+)
 
 
-def generate_prompt(source_paths, ut_template_path=None, csv_file_path=None, output_file=None):
+def generate_prompt(source_paths, ut_template_path=None, csv_file_path=None, output_file=None, fewshot_file: str = None):
     """
     生成prompt文本
     
     Args:
         source_paths: 源码路径列表
         ut_template_path: UT模板文件路径
-        csv_file_path: 参考输入参数CSV文件路径
+        csv_file_path: 参考输入参数CSV/XLSX文件路径
         output_file: 输出文件路径
     
     Returns:
@@ -90,15 +96,31 @@ def generate_prompt(source_paths, ut_template_path=None, csv_file_path=None, out
                 "```",
                 ""
             ])
+
+    # 添加Stage2 Few-shot参考
+    if fewshot_file and Path(fewshot_file).exists():
+        fewshot_content = read_file_content(Path(fewshot_file))
+        if fewshot_content:
+            prompt_lines.extend([
+                "以下是与算子相关的Few-shot示例（用于指导UT风格与覆盖点）：",
+                "",
+                fewshot_content,
+                ""
+            ])
     
-    # 添加CSV参考参数
+    # 添加参考参数（支持 CSV 或 XLSX）
     if csv_file_path and Path(csv_file_path).exists():
-        csv_content = read_csv_content(csv_file_path)
-        if csv_content:
+        suffix = Path(csv_file_path).suffix.lower()
+        if suffix in {'.xlsx', '.xls'}:
+            param_content = read_excel_content(csv_file_path)
+        else:
+            param_content = read_csv_content(csv_file_path)
+
+        if param_content:
             prompt_lines.extend([
                 "以下是参考的输入参数信息（用于单测的入参）：",
                 "",
-                csv_content,
+                param_content,
                 "",
                 "请参考以上参数信息设计测试用例的输入参数，确保生成的单测能够覆盖这些参数组合。",
                 ""
@@ -119,23 +141,25 @@ def generate_prompt(source_paths, ut_template_path=None, csv_file_path=None, out
 def main():
     """主函数"""
     if len(sys.argv) < 2:
-        print("用法: python prompt_generator.py <源码路径1> [源码路径2] ... [-t 模板路径] [-c CSV参数文件] [-o 输出文件]")
+        print("用法: python prompt_generator.py <源码路径1> [源码路径2] ... [-t 模板路径] [-c CSV/XLSX参数文件] [-f Few-shot文件] [-o 输出文件]")
         print()
         print("参数说明:")
         print("  源码路径      - C++源码目录或文件路径，支持多个")
         print("  -t 模板路径   - UT模板文件路径")
-        print("  -c CSV文件    - 参考输入参数CSV文件路径")
+        print("  -c 参数文件   - 参考输入参数CSV或XLSX文件路径")
+        print("  -f Few-shot   - Stage2参考Few-shot文本文件")
         print("  -o 输出文件   - prompt输出文件路径")
         print()
         print("示例:")
         print("  python prompt_generator.py ../cann-ops-adv/src/mc2/all_gather_matmul -o prompt.txt")
-        print("  python prompt_generator.py ../src1 ../src2 -t template.cpp -c params.csv -o prompt.txt")
+        print("  python prompt_generator.py ../src1 ../src2 -t template.cpp -c params.xlsx -o prompt.txt")
         return
     
     # 解析命令行参数
     source_paths = []
     ut_template = None
     csv_file = None
+    fewshot_file = None
     output_file = None
     
     i = 1
@@ -150,6 +174,9 @@ def main():
         elif arg == '-o' and i + 1 < len(sys.argv):
             output_file = sys.argv[i + 1]
             i += 2
+        elif arg == '-f' and i + 1 < len(sys.argv):
+            fewshot_file = sys.argv[i + 1]
+            i += 2
         elif not arg.startswith('-'):
             source_paths.append(arg)
             i += 1
@@ -161,7 +188,7 @@ def main():
         return
     
     # 生成prompt
-    generate_prompt(source_paths, ut_template, csv_file, output_file)
+    generate_prompt(source_paths, ut_template, csv_file, output_file, fewshot_file)
 
 
 if __name__ == "__main__":

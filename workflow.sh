@@ -102,7 +102,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     # 调用测试参数生成器
     echo "🚀 调用测试参数生成器..." | tee -a "$log_file"
     if python3 "$STAGE_1" "$operator_name" "$output_file" "$prompt_file" \
-                "$FEWSHOT_EXAMPLES_FILE" "$API_KEY" "$BASE_URL" "$MODEL_NAME" "${source_paths[@]}" 2>&1 | tee -a "$log_file"; then
+                "$FEWSHOT_STAGE1_FILE" "$API_KEY" "$BASE_URL" "$MODEL_NAME" "${source_paths[@]}" 2>&1 | tee -a "$log_file"; then
         
         if [ -f "$output_file" ]; then
             echo "✅ 测试参数生成成功: $output_file" | tee -a "$log_file"
@@ -145,16 +145,28 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     local output_file="$run_dir/test_${operator_lower}_tiling.cpp"
     local log_file="$run_dir/generation.log"
     
-    # 查找参考CSV文件
-    local csv_file=""
+    # 查找参考参数文件（支持 .xlsx 和 .csv）
+    local param_file=""
     if [ "$ENABLE_AUTO_CSV_SEARCH" = "true" ]; then
-        echo "🔍 查找参考CSV参数文件..." | tee -a "$log_file"
+        echo "🔍 查找参考参数文件 (xlsx/csv)..." | tee -a "$log_file"
         local operator_lower=$(to_lower "$operator_name")
-        
-        # 查找最新的测试参数文件
+
+        local candidates=()
+        # 找到最新的 xlsx
+        if compgen -G "runs/*/test_params_${operator_lower}.xlsx" > /dev/null; then
+            local latest_xlsx=$(ls -t runs/*/test_params_${operator_lower}.xlsx | head -n 1)
+            candidates+=("$latest_xlsx")
+        fi
+        # 找到最新的 csv
         if compgen -G "runs/*/test_params_${operator_lower}.csv" > /dev/null; then
-            csv_file=$(ls -t runs/*/test_params_${operator_lower}.csv | head -n 1)
-            echo "找到参考CSV文件: $csv_file" | tee -a "$log_file"
+            local latest_csv=$(ls -t runs/*/test_params_${operator_lower}.csv | head -n 1)
+            candidates+=("$latest_csv")
+        fi
+
+        if [ ${#candidates[@]} -gt 0 ]; then
+            # 在候选中选择修改时间最新的一个
+            param_file=$(ls -t "${candidates[@]}" | head -n 1)
+            echo "找到参考参数文件: $param_file" | tee -a "$log_file"
         fi
     fi
     
@@ -163,7 +175,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
         echo "开始时间: $(date)"
         echo "算子名称: $operator_name"
         echo "源码路径: ${source_paths[*]}"
-        echo "CSV参考文件: ${csv_file:-无}"
+        echo "参数参考文件: ${param_file:-无}"
         echo "运行目录: $run_dir"
         echo "=============================="
         echo ""
@@ -172,9 +184,14 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     # 步骤1: 生成prompt
     echo "📝 步骤1: 生成Prompt..." | tee -a "$log_file"
     local prompt_args=("${source_paths[@]}" "-t" "$UT_TEMPLATE_FILE" "-o" "$prompt_file")
-    if [ -n "$csv_file" ]; then
-        prompt_args+=("-c" "$csv_file")
-        echo "使用参考CSV文件: $(basename "$csv_file")" | tee -a "$log_file"
+    # 为Stage 2注入few-shot文件（可选）
+    if [ -n "$FEWSHOT_STAGE2_FILE" ] && [ -f "$FEWSHOT_STAGE2_FILE" ]; then
+        prompt_args+=("-f" "$FEWSHOT_STAGE2_FILE")
+        echo "使用Stage2 Few-shot文件: $(basename "$FEWSHOT_STAGE2_FILE")" | tee -a "$log_file"
+    fi
+    if [ -n "$param_file" ]; then
+        prompt_args+=("-c" "$param_file")
+        echo "使用参考参数文件: $(basename "$param_file")" | tee -a "$log_file"
     fi
     
     if python3 "$PROMPT_GENERATOR" "${prompt_args[@]}" 2>&1 | tee -a "$log_file"; then

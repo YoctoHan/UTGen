@@ -7,25 +7,17 @@
 # 获取脚本目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 检查参数数量
+# 检查参数数量（不再接收Few-shot文件，全部从config.sh读取）
 if [ $# -lt 2 ]; then
     echo "错误: 参数不足"
-    echo "用法: $0 <算子名称> [Few-shot文件] <源码路径...>"
-    echo "示例: $0 AllGatherMatmul /path/to/source"
-    echo "     $0 AllGatherMatmul fewshot.txt /path/to/source1 /path/to/source2"
+    echo "用法: $0 <算子名称> <源码路径...>"
+    echo "示例: $0 AllGatherMatmul /path/to/source1 /path/to/source2"
     exit 1
 fi
 
 # 获取算子名称
 OPERATOR_NAME="$1"
 shift
-
-# 检查第二个参数是否是few-shot文件
-FEWSHOT_FILE=""
-if [ $# -gt 1 ] && [[ "$1" == *.txt || "$1" == *.json ]]; then
-    FEWSHOT_FILE="$1"
-    shift
-fi
 
 # 剩余参数都是源码路径
 SOURCE_PATHS=("$@")
@@ -62,11 +54,6 @@ fi
 # 加载config.sh中的配置
 source "$SCRIPT_DIR/config.sh"
 
-# 如果提供了few-shot文件，覆盖默认配置
-if [ -n "$FEWSHOT_FILE" ]; then
-    export FEWSHOT_EXAMPLES_FILE="$FEWSHOT_FILE"
-fi
-
 # 执行完整流程
 echo "🚀 开始执行测试用例生成流程"
 echo "算子名称: $OPERATOR_NAME"
@@ -74,7 +61,7 @@ echo "源码路径: ${SOURCE_PATHS[@]}"
 echo "API配置: ${BASE_URL} (${MODEL_NAME})"
 echo "Few-shot: ${FEWSHOT_EXAMPLES_FILE}"
 echo "=================================="
-
+exit -1
 # 调用 workflow.sh 执行完整流程
 cd "$SCRIPT_DIR"
 ./workflow.sh gen-all "$OPERATOR_NAME" "${SOURCE_PATHS[@]}"
