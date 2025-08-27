@@ -145,37 +145,14 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     local output_file="$run_dir/test_${operator_lower}_tiling.cpp"
     local log_file="$run_dir/generation.log"
     
-    # 查找参考参数文件（支持 .xlsx 和 .csv）
-    local param_file=""
-    if [ "$ENABLE_AUTO_CSV_SEARCH" = "true" ]; then
-        echo "🔍 查找参考参数文件 (xlsx/csv)..." | tee -a "$log_file"
-        local operator_lower=$(to_lower "$operator_name")
-
-        local candidates=()
-        # 找到最新的 xlsx
-        if compgen -G "runs/*/test_params_${operator_lower}.xlsx" > /dev/null; then
-            local latest_xlsx=$(ls -t runs/*/test_params_${operator_lower}.xlsx | head -n 1)
-            candidates+=("$latest_xlsx")
-        fi
-        # 找到最新的 csv
-        if compgen -G "runs/*/test_params_${operator_lower}.csv" > /dev/null; then
-            local latest_csv=$(ls -t runs/*/test_params_${operator_lower}.csv | head -n 1)
-            candidates+=("$latest_csv")
-        fi
-
-        if [ ${#candidates[@]} -gt 0 ]; then
-            # 在候选中选择修改时间最新的一个
-            param_file=$(ls -t "${candidates[@]}" | head -n 1)
-            echo "找到参考参数文件: $param_file" | tee -a "$log_file"
-        fi
-    fi
+    # 参数文件由 stage_2.py 内部统一检索与处理
     
     # 记录开始信息
     {
         echo "开始时间: $(date)"
         echo "算子名称: $operator_name"
         echo "源码路径: ${source_paths[*]}"
-        echo "参数参考文件: ${param_file:-无}"
+        echo "参数参考文件: 由Python阶段自动检索"
         echo "运行目录: $run_dir"
         echo "=============================="
         echo ""
@@ -183,6 +160,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     
     # 交由 Python 版本的 Stage 2 统一处理
     echo "🚚 将Stage 2流程移交给 stage_2.py..." | tee -a "$log_file"
+
     if python3 "$STAGE_2" "$operator_name" "${source_paths[@]}" 2>&1 | tee -a "$log_file"; then
         echo "✅ 单元测试生成成功!" | tee -a "$log_file"
         return 0
