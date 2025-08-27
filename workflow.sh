@@ -183,7 +183,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     
     # 步骤1: 生成prompt
     echo "📝 步骤1: 生成Prompt..." | tee -a "$log_file"
-    local prompt_args=("${source_paths[@]}" "-t" "$UT_TEMPLATE_FILE" "-o" "$prompt_file")
+    local prompt_args=("${source_paths[@]}" "-t" "$UT_TEMPLATE_FILE" "-o" "$prompt_file" "-n" "$operator_name")
     # 为Stage 2注入few-shot文件（可选）
     if [ -n "$FEWSHOT_STAGE2_FILE" ] && [ -f "$FEWSHOT_STAGE2_FILE" ]; then
         prompt_args+=("-f" "$FEWSHOT_STAGE2_FILE")
@@ -192,6 +192,32 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     if [ -n "$param_file" ]; then
         prompt_args+=("-c" "$param_file")
         echo "使用参考参数文件: $(basename "$param_file")" | tee -a "$log_file"
+    fi
+
+    # 收集历史/参考UT文件：
+    # 1) runs 目录下本算子名相关的最新 UT
+    # 2) TEST_EXAMPLES_DIR 中名称包含算子名的 *.cpp/cc/cxx/hpp/h
+    local reference_files=()
+    # 1) runs 目录
+    if compgen -G "runs/*/test_${operator_lower}_tiling.cpp" > /dev/null; then
+        local latest_ut=$(ls -t runs/*/test_${operator_lower}_tiling.cpp | head -n 1)
+        reference_files+=("$latest_ut")
+        echo "参考历史UT: $latest_ut" | tee -a "$log_file"
+    fi
+    # 2) TEST_EXAMPLES_DIR 中模糊匹配
+    if [ -d "$TEST_EXAMPLES_DIR" ]; then
+        while IFS= read -r f; do
+            reference_files+=("$f")
+        done < <(find "$TEST_EXAMPLES_DIR" -type f \( -iname "*.cpp" -o -iname "*.cc" -o -iname "*.cxx" -o -iname "*.hpp" -o -iname "*.h" \) -iname "*${operator_lower}*" | sort)
+    fi
+    # 注入到 prompt 参数
+    if [ ${#reference_files[@]} -gt 0 ]; then
+        for rf in "${reference_files[@]}"; do
+            prompt_args+=("-r" "$rf")
+        done
+        echo "共注入参考UT文件: ${#reference_files[@]} 个" | tee -a "$log_file"
+    else
+        echo "未找到参考UT文件，跳过注入" | tee -a "$log_file"
     fi
     
     if python3 "$PROMPT_GENERATOR" "${prompt_args[@]}" 2>&1 | tee -a "$log_file"; then

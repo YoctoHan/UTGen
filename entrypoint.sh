@@ -59,9 +59,10 @@ echo "🚀 开始执行测试用例生成流程"
 echo "算子名称: $OPERATOR_NAME"
 echo "源码路径: ${SOURCE_PATHS[@]}"
 echo "API配置: ${BASE_URL} (${MODEL_NAME})"
-echo "Few-shot: ${FEWSHOT_EXAMPLES_FILE}"
+echo "Stage1 Few-shot: ${FEWSHOT_STAGE1_FILE}"
+echo "Stage2 Few-shot: ${FEWSHOT_STAGE2_FILE}"
 echo "=================================="
-exit -1
+
 # 调用 workflow.sh 执行完整流程
 cd "$SCRIPT_DIR"
 ./workflow.sh gen-all "$OPERATOR_NAME" "${SOURCE_PATHS[@]}"
