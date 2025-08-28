@@ -340,7 +340,6 @@ def stage2(operator_name: str, source_paths: List[str]) -> int:
 
     # 初始化模型调用器
     caller = ModelCaller(api_key, base_url, model_name, use_cache=True)
-
     # 抽取模板（仅取第一个参考UT）
     extractor = TemplateExtractor(caller)
     template_raw = extractor.extract_template(str(reference_files[0]), operator_name)
