@@ -357,24 +357,8 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     x1, x2, go, out, bias = ensure_shapes(spec)
     dt_in, dt_out = dtype_to_ge(spec.dtype)
     world_size = spec.world_size
-    rank_attr_key = "rank_size"  # 与参考UT多数保持一致
-
-    outputs_count = 1 + (1 if go else 0)
-    inputs_count = 2 + (1 if bias else 0)
-
+    
     test_name = spec.name
-    # 组装 NodeAttrs 片段，使用 <LB>/<RB> 占位符，最后统一替换
-    node_attrs: List[str] = [
-        '<LB>"group", group<RB>',
-        f'<LB>"{rank_attr_key}", "{world_size}"<RB>',
-        f'<LB>"gather_index", "{spec.gather_index}"<RB>',
-        f'<LB>"comm_turn", "{spec.comm_turn}"<RB>',
-        f'<LB>"is_trans_a", "{'True' if spec.is_trans_a else 'False'}"<RB>',
-        f'<LB>"is_trans_b", "{'True' if spec.is_trans_b else 'False'}"<RB>',
-    ]
-    if go:
-        node_attrs.append('<LB>"gather_output", "True"<RB>')
-
     # 期望 tiling key 断言
     tiling_key_check = ""
     if spec.expected_tiling_key is not None:
@@ -385,36 +369,26 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
                 f"    ASSERT_EQ(tiling_key, {spec.expected_tiling_key});",
             ])
         )
-
-    # 输出形状构造器占位
-    output_shapes_ctor = (
-        "<LB>gather_output_shape, output_shape<RB>" if go else "<LB>output_shape<RB>"
-    )
-
-    # NodeOutputTd 输出个数
-    node_output_td_lines: List[str] = []
-    out_idx = 0
-    if go:
-        node_output_td_lines.append(
-            f"                        .NodeOutputTd({out_idx}, {dt_out}, FORMAT_ND, FORMAT_ND)"
-        )
-        out_idx += 1
-    node_output_td_lines.append(
-        f"                        .NodeOutputTd({out_idx}, {dt_out}, FORMAT_ND, FORMAT_ND)"
-    )
-
+    
+    # 组装 NodeAttrs 片段（参考UT：使用 ge::AnyValue，且不包含 rank_size 与 gather_output）
+    attr_parts = [
+        "<LB>\"group\", ge::AnyValue::CreateFrom<std::string>(group)<RB>",
+        f"<LB>\"is_trans_a\", ge::AnyValue::CreateFrom<bool>({'true' if spec.is_trans_a else 'false'})<RB>",
+        f"<LB>\"is_trans_b\", ge::AnyValue::CreateFrom<bool>({'true' if spec.is_trans_b else 'false'})<RB>",
+        f"<LB>\"gather_index\", ge::AnyValue::CreateFrom<int64_t>({spec.gather_index})<RB>",
+        f"<LB>\"comm_turn\", ge::AnyValue::CreateFrom<int64_t>({spec.comm_turn})<RB>",
+    ]
+    
     # 组装测试代码（用占位符规避花括号转义）
     lines: List[str] = []
     lines.append(f"TEST_F({op_name}Tiling, {test_name}) <LB>")
     lines.append("    // 1. Setup interfaces")
     lines.append(f"    std::string op_type(\"{op_name}\");")
-    lines.append("    auto op_impl = OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str());")
-    lines.append("    ASSERT_NE(op_impl, nullptr);")
-    lines.append("    auto tiling_func = op_impl->tiling;")
-    lines.append("    map<string, string> socversions = <LB><LB>\"Short_Soc_version\", \"ascend910b\"<RB><RB>;")
+    lines.append("    ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);")
+    lines.append("    auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;")
+    lines.append("    auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;")
     lines.append("")
     lines.append("    // 2. Setup compile info and platform info")
-    # 原始UT包含 compile_info_string 字段
     lines.append("    string compile_info_string = R\"(<LB>")
     lines.append("        \"hardware_info\": <LB>")
     lines.append("            \"BT_SIZE\": 1024,")
@@ -435,86 +409,80 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     lines.append("    map<string, string> soc_infos;")
     lines.append("    map<string, string> aicore_spec;")
     lines.append("    map<string, string> intrinsics;")
+    lines.append("    GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);")
     lines.append("")
     lines.append("    fe::PlatFormInfos platform_info;")
     lines.append("    platform_info.Init();")
     lines.append(f"    struct {op_name}CompileInfo <LB><RB> compile_info;")
     lines.append("")
+    lines.append("    // tilingParseFunc simulate")
+    lines.append("    auto kernel_holder =")
+    lines.append("        gert::KernelRunContextFaker()")
+    lines.append("            .KernelIONum(4, 2)")
+    lines.append("            .Inputs(<LB>const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)<RB>)")
+    lines.append("            .Outputs(<LB>&compile_info<RB>)")
+    lines.append("            .Build();")
+    lines.append("")
     lines.append("    // 3. Create context")
-    lines.append("    auto param = TilingData::CreateCap(4096);")
+    lines.append("    auto param = gert::TilingData::CreateCap(4096);")
     lines.append("    ASSERT_NE(param, nullptr);")
     lines.append("")
-    lines.append("    auto workspace_size_holer = ContinuousVector::Create<size_t>(4096);")
-    lines.append("    auto ws_size = reinterpret_cast<ContinuousVector*>(workspace_size_holer.get());")
+    lines.append("    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);")
+    lines.append("    auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());")
     lines.append("")
     lines.append("    // 4. Define input/output shapes (dims 与 storage_dims 对齐)")
-    lines.append(f"    StorageShape x1_shape = <LB><LB>{x1[0]}, {x1[1]}<RB>, <LB>{x1[0]}, {x1[1]}<RB><RB>;")
-    lines.append(f"    StorageShape x2_shape = <LB><LB>{x2[0]}, {x2[1]}<RB>, <LB>{x2[0]}, {x2[1]}<RB><RB>;")
+    lines.append(f"    gert::StorageShape x1_shape = <LB><LB>{x1[0]}, {x1[1]}<RB>, <LB>{x1[0]}, {x1[1]}<RB><RB>;")
+    lines.append(f"    gert::StorageShape x2_shape = <LB><LB>{x2[0]}, {x2[1]}<RB>, <LB>{x2[0]}, {x2[1]}<RB><RB>;")
     if bias:
-        lines.append(f"    StorageShape x3_shape = <LB><LB>{bias[0]}<RB>, <LB>{bias[0]}<RB><RB>;")
-    # gather_output_shape 默认与 x1 相同（对齐原始UT风格）
-    go_m, go_n = (x1[0], x1[1]) if go else (x1[0], x1[1])
-    lines.append(f"    StorageShape gather_output_shape = <LB><LB>{go_m}, {go_n}<RB>, <LB>{go_m}, {go_n}<RB><RB>;")
-    lines.append(f"    StorageShape output_shape = <LB><LB>{out[0]}, {out[1]}<RB>, <LB>{out[0]}, {out[1]}<RB><RB>;")
+        lines.append(f"    gert::StorageShape x3_shape = <LB><LB>{bias[0]}<RB>, <LB>{bias[0]}<RB><RB>;")
+    go_m, go_n = (x1[0], x1[1])
+    lines.append(f"    gert::StorageShape gather_output_shape = <LB><LB>{go_m}, {go_n}<RB>, <LB>{go_m}, {go_n}<RB><RB>;")
+    lines.append(f"    gert::StorageShape output_shape = <LB><LB>{out[0]}, {out[1]}<RB>, <LB>{out[0]}, {out[1]}<RB><RB>;")
     lines.append("")
     lines.append("    // 5. Build fake context")
     lines.append("    string group(\"group\");")
     lines.append("")
-    lines.append("    auto holder = TilingContextFaker()")
-    # 对齐原始UT：固定 NodeIoNum(4, 2)，第4个输入传 nullptr
+    lines.append("    auto holder = gert::TilingContextFaker()")
     lines.append("                        .NodeIoNum(4, 2)")
-    # IR 实例：与原始UT一致给出 4 个实例占位
     lines.append("                        .IrInstanceNum(<LB>1, 1, 1, 1<RB>)")
-    # 输入形状：使用地址与 nullptr 占位
     if bias:
         lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, &x3_shape, nullptr<RB>)")
     else:
         lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, nullptr, nullptr<RB>)")
-    # 输出形状顺序对齐原始文件：先 output，再 gather_output
     lines.append("                        .OutputShapes(<LB>&output_shape, &gather_output_shape<RB>)")
-    # 节点属性：与原始UT一致使用 AnyValue 带类型
-    attr_parts = [
-        "<LB>\"group\", AnyValue::CreateFrom<string>(group)<RB>",
-        f"<LB>\"is_trans_a\", AnyValue::CreateFrom<bool>({'true' if spec.is_trans_a else 'false'})<RB>",
-        f"<LB>\"is_trans_b\", AnyValue::CreateFrom<bool>({'true' if spec.is_trans_b else 'false'})<RB>",
-        f"<LB>\"gather_index\", AnyValue::CreateFrom<int64_t>({spec.gather_index})<RB>",
-        f"<LB>\"comm_turn\", AnyValue::CreateFrom<int64_t>({spec.comm_turn})<RB>",
-    ]
     lines.append(f"                        .NodeAttrs(<LB>{', '.join(attr_parts)}<RB>)")
     lines.append("                        .CompileInfo(&compile_info)")
     lines.append("                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))")
-    lines.append(f"                        .NodeInputTd(0, {dt_in}, FORMAT_ND, FORMAT_ND)")
-    lines.append(f"                        .NodeInputTd(1, {dt_in}, FORMAT_ND, FORMAT_ND)")
-    if bias:
-        lines.append(f"                        .NodeInputTd(2, {dt_in}, FORMAT_ND, FORMAT_ND)")
-    # 输出 TensorDesc：两个输出（对齐原始UT）
-    lines.append(f"                        .NodeOutputTd(0, {dt_out}, FORMAT_ND, FORMAT_ND)")
-    lines.append(f"                        .NodeOutputTd(1, {dt_out}, FORMAT_ND, FORMAT_ND)")
+    lines.append(f"                        .NodeInputTd(0, ge::{dt_in}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    lines.append(f"                        .NodeInputTd(1, ge::{dt_in}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    lines.append(f"                        .NodeInputTd(2, ge::{dt_in}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    lines.append(f"                        .NodeOutputTd(0, ge::{dt_out}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    lines.append(f"                        .NodeOutputTd(1, ge::{dt_out}, ge::FORMAT_ND, ge::FORMAT_ND)")
     lines.append("                        .TilingData(param.get())")
     lines.append("                        .Workspace(ws_size)")
     lines.append("                        .Build();")
     lines.append("")
     lines.append("    // 6. Init TilingContext pointer")
-    lines.append("    TilingContext* tiling_context = holder.GetContext<TilingContext>();")
+    lines.append("    gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();")
     lines.append("    ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);")
     lines.append("")
     lines.append("    // 7. Set Compile settings")
-    lines.append("    holder.GetContext<TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"SoCInfo\", soc_infos);")
-    lines.append("    holder.GetContext<TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"AICoreSpec\", aicore_spec);")
-    lines.append("    holder.GetContext<TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType(\"AICore\");")
-    lines.append("    holder.GetContext<TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"AICoreintrinsicDtypeMap\", intrinsics);")
+    lines.append("    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"SoCInfo\", soc_infos);")
+    lines.append("    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"AICoreSpec\", aicore_spec);")
+    lines.append("    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType(\"AICore\");")
+    lines.append("    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes(\"AICoreintrinsicDtypeMap\", intrinsics);")
     lines.append("")
     lines.append("    // 8. Set communication")
-    lines.append("    HcomTopoInfo::TopoInfo topoInfo;")
+    lines.append("    ge::HcomTopoInfo::TopoInfo topoInfo;")
     lines.append(f"    topoInfo.rank_size = {world_size};")
-    lines.append("    HcomTopoInfo::Instance().SetGroupTopoInfo(group.c_str(), topoInfo);")
-    lines.append("    tiling_context->GetPlatformInfo()->SetPlatformRes(\"version\", socversions);")
+    lines.append("    topoInfo.topo_level_descs[0].comm_sets = 0b1U;")
+    lines.append("    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(group.c_str(), topoInfo);")
     lines.append("")
     lines.append("    // 9. Call op function, check returns == GRAPH_SUCCESS")
-    lines.append("    EXPECT_EQ(tiling_func(tiling_context), GRAPH_SUCCESS);")
+    lines.append("    EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);")
     lines.append("")
     lines.append("    // 10. Unset communication")
-    lines.append("    HcomTopoInfo::Instance().UnsetGroupTopoInfo(group.c_str());")
+    lines.append("    ge::HcomTopoInfo::Instance().UnsetGroupTopoInfo(group.c_str());")
     if tiling_key_check:
         lines.append(tiling_key_check)
     lines.append("<RB>")
