@@ -83,6 +83,25 @@ class TestcasePromptGenerator:
 - 测试用例名称应描述测试目的，请参考示例中的命名方式
 - 数值参数使用合理的范围和步长
 
+## 特殊要求
+
+### tiling-key 取值范围说明
+
+- **是否带 bias**  
+  - 不带 bias：不加额外值  
+  - 带 bias（存在第 3 个可选输入）：`+1`
+
+- **是否 ND2NZ**  
+  - 当前实现固定为 `1` （`SetSocParam` 将 `isND2NZ` 置为 `1`）：`+10`
+
+- **通信算法**  
+  - 当前实现固定为 `FULL_MESH`（`SetCommAlg`）：`+100`
+
+### 计算规则
+- **不带 bias** → `tilingKey = 110`  
+- **带 bias** → `tilingKey = 111`
+
+
 ### 4. 输出格式
 CSV格式，第一行为列名，格式示例：
 ```csv
@@ -114,7 +133,7 @@ boundary_min,1,1,1,...
        
         # 分析算子特征
         operator_analysis = self._analyze_operator(source_code_section)
-
+        # breakpoint()
         # 生成示例部分
         examples_section = self._generate_examples_section(fewshot_content)
 

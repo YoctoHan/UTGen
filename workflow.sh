@@ -99,6 +99,10 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
         echo ""
     } > "$log_file"
     
+    # 打印指令
+    # echo "🚀 执行指令: python3 $STAGE_1 $operator_name $output_file $prompt_file $FEWSHOT_STAGE1_FILE $API_KEY $BASE_URL $MODEL_NAME ${source_paths[@]} 2>&1 | tee -a $log_file" | tee -a "$log_file"
+    # exit 1
+
     # 调用测试参数生成器
     echo "🚀 调用测试参数生成器..." | tee -a "$log_file"
     if python3 "$STAGE_1" "$operator_name" "$output_file" "$prompt_file" \
