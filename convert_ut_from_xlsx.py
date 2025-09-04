@@ -17,7 +17,8 @@
   - m,k,n（或 x1_shape/x2_shape/gather_output_shape/output_shape 形如 "[1024,2048]"）
   - dtype（float16/bfloat16/bf16）
   - is_trans_a/transpose_a, is_trans_b/transpose_b（True/False/1/0）
-  - has_bias/bias（True/False）
+  - is_bias（True/False）
+  - bias_len（可选，整数）或 bias_shape（可选，如 "[12288]")
   - world_size/rank_size（整数）
   - gather_output（True/False）、gather_index、comm_turn
   - expected_tiling_key/tiling_key（整数，可选）
@@ -172,6 +173,27 @@ def parse_shape(value: Any) -> Optional[Tuple[int, int]]:
         return None
 
 
+def parse_shape1d(value: Any) -> Optional[int]:
+    """解析一维形状，返回长度，如 "[12288]"、12288、[12288]。"""
+    if value is None:
+        return None
+    if isinstance(value, (list, tuple)):
+        if len(value) == 1:
+            try:
+                return int(float(value[0]))
+            except Exception:
+                return None
+        return None
+    s = str(value).strip()
+    if not s:
+        return None
+    s = s.strip('[](){}')
+    try:
+        return int(float(s))
+    except Exception:
+        return None
+
+
 def parse_shape_list(value: Any) -> List[Tuple[int, ...]]:
     """解析形如 "[[512,12288],[12288,3904],[3904]]" 的形状列表。
     返回形如 [(512,12288),(12288,3904),(3904,)]，对一维形状返回单元素元组。
@@ -250,6 +272,8 @@ class CaseSpec:
     x2_shape: Optional[Tuple[int, int]] = None
     gather_output_shape: Optional[Tuple[int, int]] = None
     output_shape: Optional[Tuple[int, int]] = None
+    # bias 长度（可选，若提供则覆盖默认 out_n）
+    bias_len: Optional[int] = None
 
 
 def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
@@ -294,13 +318,15 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
     )
     is_trans_a = parse_bool(row.get("is_trans_a") or row.get("transpose_a") or False)
     is_trans_b = parse_bool(row.get("is_trans_b") or row.get("transpose_b") or False)
-    # has_bias: 显式列或 bias_shape 列存在或 input_tensor_shape 包含第三个
-    has_bias = parse_bool(row.get("has_bias") or row.get("bias") or False)
-    if not has_bias:
-        if row.get("bias_shape") not in (None, "", []):
-            has_bias = True
-        if inputs and len(inputs) >= 3:
-            has_bias = True
+    # has_bias: 仅由 xlsx 的 is_bias 字段决定，不再进行额外推断
+    has_bias = parse_bool(row.get("is_bias") or False)
+
+    # 可选：bias_len 或 bias_shape 指定一维 bias 的长度
+    bias_len: Optional[int] = None
+    if "bias_len" in row:
+        bias_len = parse_int(row.get("bias_len"), None)
+    if bias_len is None and row.get("bias_shape") is not None:
+        bias_len = parse_shape1d(row.get("bias_shape"))
     world_size = parse_int(row.get("world_size") or row.get("rank_size") or 8, 8)
     gather_output = parse_bool(row.get("gather_output") or (go_shape is not None) or True)
     gather_index = parse_int(row.get("gather_index") or 0, 0)
@@ -330,6 +356,7 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
         x2_shape=x2_shape,
         gather_output_shape=go_shape,
         output_shape=out_shape,
+        bias_len=bias_len,
     )
 
 
@@ -349,7 +376,14 @@ def ensure_shapes(spec: CaseSpec) -> Tuple[Tuple[int, int], Tuple[int, int], Opt
         x2 = (n, k) if spec.is_trans_b else (k, n)
         out = (m, n)
         go = (m, k)
-    bias_shape = (out[1],) if spec.has_bias else None
+    if spec.has_bias:
+        if spec.bias_len is not None:
+            bias_shape = (int(spec.bias_len),)
+        else:
+            # 回退：使用输出列维度
+            bias_shape = (out[1],)
+    else:
+        bias_shape = None
     return x1, x2, (go if spec.gather_output else None), out, bias_shape
 
 
@@ -433,8 +467,8 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     lines.append("    // 4. Define input/output shapes (dims 与 storage_dims 对齐)")
     lines.append(f"    gert::StorageShape x1_shape = <LB><LB>{x1[0]}, {x1[1]}<RB>, <LB>{x1[0]}, {x1[1]}<RB><RB>;")
     lines.append(f"    gert::StorageShape x2_shape = <LB><LB>{x2[0]}, {x2[1]}<RB>, <LB>{x2[0]}, {x2[1]}<RB><RB>;")
-    if bias:
-        lines.append(f"    gert::StorageShape x3_shape = <LB><LB>{bias[0]}<RB>, <LB>{bias[0]}<RB><RB>;")
+    if spec.has_bias:
+        lines.append(f"    gert::StorageShape bias_shape = <LB><LB>{bias[0]}<RB>, <LB>{bias[0]}<RB><RB>;")
     go_m, go_n = (x1[0], x1[1])
     lines.append(f"    gert::StorageShape gather_output_shape = <LB><LB>{go_m}, {go_n}<RB>, <LB>{go_m}, {go_n}<RB><RB>;")
     lines.append(f"    gert::StorageShape output_shape = <LB><LB>{out[0]}, {out[1]}<RB>, <LB>{out[0]}, {out[1]}<RB><RB>;")
@@ -445,7 +479,7 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     lines.append("    auto holder = gert::TilingContextFaker()")
     lines.append("                        .NodeIoNum(4, 2)")
     lines.append("                        .IrInstanceNum(<LB>1, 1, 1, 1<RB>)")
-    if bias:
+    if spec.has_bias:
         lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, &x3_shape, nullptr<RB>)")
     else:
         lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, nullptr, nullptr<RB>)")
@@ -521,6 +555,7 @@ def main():
         return 1
 
     ref_content = read_text(ref_path)
+
     # 完整移除 TEST_F，以尽量保留所有公共辅助代码
     common_full = strip_all_testf_blocks(ref_content)
     common_prefix = extract_common_prefix(common_full)
