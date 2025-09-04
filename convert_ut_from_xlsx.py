@@ -480,7 +480,7 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     lines.append("                        .NodeIoNum(4, 2)")
     lines.append("                        .IrInstanceNum(<LB>1, 1, 1, 1<RB>)")
     if spec.has_bias:
-        lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, &x3_shape, nullptr<RB>)")
+        lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, &bias_shape, nullptr<RB>)")
     else:
         lines.append("                        .InputShapes(<LB>&x1_shape, &x2_shape, nullptr, nullptr<RB>)")
     lines.append("                        .OutputShapes(<LB>&output_shape, &gather_output_shape<RB>)")
