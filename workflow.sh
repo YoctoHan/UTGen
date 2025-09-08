@@ -110,7 +110,17 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
         
         if [ -f "$output_file" ]; then
             echo "✅ 测试参数生成成功: $output_file" | tee -a "$log_file"
-            echo "生成的测试参数: $(wc -l < "$output_file") 行" | tee -a "$log_file"
+            rows=$(python3 - << 'PY'
+import pandas as pd
+import sys
+try:
+    df = pd.read_excel(sys.argv[1])
+    print(df.shape[0])
+except Exception:
+    print(0)
+PY
+"$output_file")
+            echo "生成的测试参数行数: ${rows}" | tee -a "$log_file"
             return 0
         else
             echo "❌ 测试参数生成失败：未生成输出文件" | tee -a "$log_file"
@@ -149,25 +159,64 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     local output_file="$run_dir/test_${operator_lower}_tiling.cpp"
     local log_file="$run_dir/generation.log"
     
-    # 参数文件由 stage_2.py 内部统一检索与处理
-    
     # 记录开始信息
     {
         echo "开始时间: $(date)"
         echo "算子名称: $operator_name"
         echo "源码路径: ${source_paths[*]}"
-        echo "参数参考文件: 由Python阶段自动检索"
+        echo "参数参考文件: 自动检索最新的 test_params_${operator_lower}.xlsx"
         echo "运行目录: $run_dir"
         echo "=============================="
         echo ""
     } >> "$log_file"
     
-    # 交由 Python 版本的 Stage 2 统一处理
-    echo "🚚 将Stage 2流程移交给 stage_2.py..." | tee -a "$log_file"
+    # -----------------------------------------------------------------
+    # 使用 convert_ut_from_xlsx.py 的工程化逻辑替换原 stage_2 流程
+    # -----------------------------------------------------------------
+    # 1) 查找最新的 xlsx 参数文件
+    local xlsx_file=""
+    local latest_xlsx=$(ls -t runs/*/test_params_${operator_lower}.xlsx 2>/dev/null | head -n 1 || true)
+    if [ -n "$latest_xlsx" ] && [ -f "$latest_xlsx" ]; then
+        xlsx_file="$latest_xlsx"
+    fi
+    if [ -z "$xlsx_file" ]; then
+        echo "❌ 未找到参数文件 runs/*/test_params_${operator_lower}.xlsx" | tee -a "$log_file"
+        return 1
+    fi
+    echo "📁 使用参数文件: $xlsx_file" | tee -a "$log_file"
 
-    if python3 "$STAGE_2" "$operator_name" "${source_paths[@]}" 2>&1 | tee -a "$log_file"; then
-        echo "✅ 单元测试生成成功!" | tee -a "$log_file"
-        return 0
+    # 2) 基于算子名推导参考UT路径：$REFERENCE_UT_DIR/test_<snake>.cpp
+    #    这里用 python 将 CamelCase 转换为 snake_case
+    local operator_snake=$(python3 - << 'PY'
+import re,sys
+name=sys.argv[1]
+# 在 小写/数字 + 大写 之间加下划线，再处理连续大写
+s1=re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', name)
+s2=re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1_\2', s1)
+print(s2.lower())
+PY
+"$operator_name")
+    local reference_ut="$REFERENCE_UT_DIR/test_${operator_snake}.cpp"
+    if [ ! -f "$reference_ut" ]; then
+        echo "❌ 参考UT不存在: $reference_ut" | tee -a "$log_file"
+        return 1
+    fi
+    echo "🧩 参考UT: $reference_ut" | tee -a "$log_file"
+
+    # 3) 调用转换脚本，输出写入当前 run_dir，保持原有目录结构
+    echo "🚚 使用 convert_ut_from_xlsx.py 生成UT..." | tee -a "$log_file"
+    if python3 "$CONVERT_UT_FROM_XLSX" \
+        --ref "$reference_ut" \
+        --xlsx "$xlsx_file" \
+        --op "$operator_name" \
+        --out "$output_file" 2>&1 | tee -a "$log_file"; then
+        if [ -f "$output_file" ]; then
+            echo "✅ 单元测试生成成功: $output_file" | tee -a "$log_file"
+            return 0
+        else
+            echo "❌ 转换完成但未发现输出文件: $output_file" | tee -a "$log_file"
+            return 1
+        fi
     else
         echo "❌ 单元测试生成失败" | tee -a "$log_file"
         return 1

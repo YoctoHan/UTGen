@@ -148,9 +148,7 @@ class ConfigValidator:
         required_scripts = [
             "utils.py",
             "stage_1.py",
-            "prompt_generator.py",
-            "model_caller.py",
-            "post_processor.py"
+            "convert_ut_from_xlsx.py",
         ]
         
         for script in required_scripts:

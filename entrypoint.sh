@@ -60,7 +60,6 @@ echo "算子名称: $OPERATOR_NAME"
 echo "源码路径: ${SOURCE_PATHS[@]}"
 echo "API配置: ${BASE_URL} (${MODEL_NAME})"
 echo "Stage1 Few-shot: ${FEWSHOT_STAGE1_FILE}"
-echo "Stage2 Few-shot: ${FEWSHOT_STAGE2_FILE}"
 echo "=================================="
 
 # 调用 workflow.sh 执行完整流程
