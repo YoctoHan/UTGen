@@ -29,6 +29,9 @@ from __future__ import annotations
 import argparse
 import re
 from dataclasses import dataclass
+import importlib.util
+import inspect
+import os
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 
@@ -387,7 +390,7 @@ def ensure_shapes(spec: CaseSpec) -> Tuple[Tuple[int, int], Tuple[int, int], Opt
     return x1, x2, (go if spec.gather_output else None), out, bias_shape
 
 
-def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
+def render_test_case_default(op_name: str, spec: CaseSpec, idx: int) -> str:
     x1, x2, go, out, bias = ensure_shapes(spec)
     dt_in, dt_out = dtype_to_ge(spec.dtype)
     world_size = spec.world_size
@@ -526,6 +529,128 @@ def render_test_case(op_name: str, spec: CaseSpec, idx: int) -> str:
     return code.strip() + "\n"
 
 
+def snake_from_camel(name: str) -> str:
+    s1 = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
+    s2 = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", s1)
+    return s2.lower()
+
+
+def load_case_template_renderer(op_name: str) -> Any:
+    """按算子名加载可插拔模板模块，返回可调用的 render(op_name, spec, idx)。
+
+    模板搜索顺序：
+    1) $CASE_TEMPLATE_DIR/<CamelCase>.py
+    2) $CASE_TEMPLATE_DIR/<snake_case>.py
+    3) $CASE_TEMPLATE_DIR/default.py
+    若均不存在，回退内置默认实现。
+    
+    模板模块可导出：
+    - 函数 render_test_case(op_name, spec, idx, helpers)
+      或
+    - 类 Template，包含方法 render_test_case(self, op_name, spec, idx, helpers)
+    
+    helpers 提供常用工具：ensure_shapes, dtype_to_ge, logger。
+    """
+    # 解析模板目录：优先使用环境变量；若为相对路径，兼容 cwd 与脚本所在目录；最终回退脚本目录下的 case-templates
+    env_dir = os.environ.get("CASE_TEMPLATE_DIR")
+    script_dir = Path(__file__).resolve().parent
+    probe_dirs: List[Path] = []
+    if env_dir:
+        p = Path(env_dir)
+        probe_dirs.append(p if p.is_absolute() else (Path(os.getcwd()) / p))
+        # 兼容相对脚本目录
+        if not p.is_absolute():
+            probe_dirs.append(script_dir / p)
+    else:
+        probe_dirs.append(Path(os.getcwd()) / "case-templates")
+    # 最终回退：脚本目录
+    probe_dirs.append(script_dir / "case-templates")
+
+    base: Optional[Path] = None
+    for d in probe_dirs:
+        try:
+            if d.exists() and d.is_dir():
+                base = d
+                break
+        except Exception:
+            continue
+
+    if base is None:
+        logger.warning("未找到模板目录，使用内置默认模板")
+        def _fallback(op: str, spec: CaseSpec, idx: int) -> str:
+            return render_test_case_default(op, spec, idx)
+        return _fallback
+
+    candidates: List[Path] = []
+    try:
+        camel = f"{op_name}.py"
+        snake = f"{snake_from_camel(op_name)}.py"
+        for filename in (camel, snake, "default.py"):
+            p = base / filename
+            if p.exists() and p.is_file():
+                candidates.append(p)
+    except Exception:
+        candidates = []
+
+    if not candidates:
+        # 返回内置默认
+        def _fallback(op: str, spec: CaseSpec, idx: int) -> str:
+            return render_test_case_default(op, spec, idx)
+        return _fallback
+
+    target = candidates[0]
+    try:
+        logger.info(f"模板目录: {base}")
+        logger.info(f"算子: {op_name}，候选模板: {[str(p.name) for p in candidates]}")
+        logger.info(f"选用模板: {target}")
+    except Exception:
+        pass
+    try:
+        spec_obj = importlib.util.spec_from_file_location(target.stem, str(target))
+        if spec_obj and spec_obj.loader:
+            module = importlib.util.module_from_spec(spec_obj)
+            spec_obj.loader.exec_module(module)
+
+            helpers = {
+                "ensure_shapes": ensure_shapes,
+                "dtype_to_ge": dtype_to_ge,
+                "logger": logger,
+            }
+
+            # 函数导出
+            func = getattr(module, "render_test_case", None)
+            if callable(func):
+                def _call(op: str, s: CaseSpec, i: int) -> str:
+                    # 优先尝试四参
+                    try:
+                        return func(op, s, i, helpers)
+                    except TypeError:
+                        return func(op, s, i)
+                return _call
+
+            # 类导出
+            cls = getattr(module, "Template", None)
+            if cls is not None:
+                try:
+                    inst = cls()
+                    method = getattr(inst, "render_test_case")
+                    if callable(method):
+                        def _call2(op: str, s: CaseSpec, i: int) -> str:
+                            try:
+                                return method(op, s, i, helpers)
+                            except TypeError:
+                                return method(op, s, i)
+                        return _call2
+                except Exception:
+                    pass
+    except Exception as e:
+        logger.warning(f"加载模板失败，使用默认模板: {e}")
+
+    def _fallback(op: str, spec: CaseSpec, idx: int) -> str:
+        return render_test_case_default(op, spec, idx)
+    return _fallback
+
+
 def load_params(xlsx_path: Path) -> List[Dict[str, Any]]:
     df = pd.read_excel(xlsx_path)
     # 转换为字典列表，并保留原始列名
@@ -575,12 +700,15 @@ def main():
         print("❌ xlsx为空，无测试参数")
         return 1
 
+    # 选择模板渲染器
+    renderer = load_case_template_renderer(op_name)
+
     # 生成测例
     cases: List[str] = []
     for idx, row in enumerate(rows, start=1):
         try:
             spec = row_to_case(row, idx)
-            case_code = render_test_case(op_name, spec, idx)
+            case_code = renderer(op_name, spec, idx)
             cases.append(case_code)
         except Exception as e:
             logger.warning(f"跳过第{idx}行: {e}")

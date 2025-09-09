@@ -1,0 +1,20 @@
+### tiling-key 取值范围说明
+- **是否带 bias**
+
+ - 触发条件基于 param.biasLen 是否非零
+ - 仅当「存在 bias 且 B 张量类型为 BF16」时才会分配额外 bias 工作区，使 biasLen > 0：+1
+ - 若「存在 bias 但 B 非 BF16」，则 biasLen = 0，不加分
+
+- **是否 ND2NZ**
+
+ - 当前实现固定为 1
+ - (MatmulReduceScatterTilingFunc 将 socParam.isND2NZ 置为 1)：+10
+
+- **通信算法**
+
+ - 当前实现固定为 FULL_MESH
+ - (SetCommAlg 将 socParam.commAlg = COMM_ALG_FULL_MESH)：+100
+
+### 计算规则
+ - **无 bias 或有 bias 但 B 非 BF16 → tilingKey** = 110
+ - **有 bias 且 B 为 BF16 → tilingKey** = 111

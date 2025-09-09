@@ -1,0 +1,15 @@
+### tiling-key 取值范围说明
+
+- **是否带 bias**  
+  - 不带 bias：不加额外值  
+  - 带 bias（存在第 3 个可选输入）：`+1`
+
+- **是否 ND2NZ**  
+  - 当前实现固定为 `1` （`SetSocParam` 将 `isND2NZ` 置为 `1`）：`+10`
+
+- **通信算法**  
+  - 当前实现固定为 `FULL_MESH`（`SetCommAlg`）：`+100`
+
+### 计算规则
+- **不带 bias** → `tilingKey = 110`  
+- **带 bias** → `tilingKey = 111`

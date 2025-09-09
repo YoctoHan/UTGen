@@ -14,6 +14,18 @@ to_lower() {
     echo "$1" | tr '[:upper:]' '[:lower:]'
 }
 
+# 将 CamelCase 转换为 snake_case，例如：AllGatherMatmul -> all_gather_matmul
+to_snake() {
+    python3 - "$1" << 'PY'
+import re, sys
+name = sys.argv[1]
+# 在 小写/数字 + 大写 之间加下划线，再处理连续大写缩写
+s1 = re.sub(r'([a-z0-9])([A-Z])', r"\1_\2", name)
+s2 = re.sub(r'([A-Z]+)([A-Z][a-z])', r"\1_\2", s1)
+print(s2.lower())
+PY
+}
+
 # =============================================================================
 # 显示帮助信息
 # =============================================================================
@@ -105,12 +117,13 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
 
     # 调用测试参数生成器
     echo "🚀 调用测试参数生成器..." | tee -a "$log_file"
-    if python3 "$STAGE_1" "$operator_name" "$output_file" "$prompt_file" \
+    # 传递 SPECIAL_REQS_DIR 环境变量给 stage_1.py
+    if SPECIAL_REQS_DIR="$SPECIAL_REQS_DIR" python3 "$STAGE_1" "$operator_name" "$output_file" "$prompt_file" \
                 "$FEWSHOT_STAGE1_FILE" "$API_KEY" "$BASE_URL" "$MODEL_NAME" "${source_paths[@]}" 2>&1 | tee -a "$log_file"; then
         
         if [ -f "$output_file" ]; then
             echo "✅ 测试参数生成成功: $output_file" | tee -a "$log_file"
-            rows=$(python3 - << 'PY'
+            rows=$(python3 - "$output_file" << 'PY'
 import pandas as pd
 import sys
 try:
@@ -119,7 +132,7 @@ try:
 except Exception:
     print(0)
 PY
-"$output_file")
+)
             echo "生成的测试参数行数: ${rows}" | tee -a "$log_file"
             return 0
         else
@@ -186,16 +199,7 @@ print(datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     echo "📁 使用参数文件: $xlsx_file" | tee -a "$log_file"
 
     # 2) 基于算子名推导参考UT路径：$REFERENCE_UT_DIR/test_<snake>.cpp
-    #    这里用 python 将 CamelCase 转换为 snake_case
-    local operator_snake=$(python3 - << 'PY'
-import re,sys
-name=sys.argv[1]
-# 在 小写/数字 + 大写 之间加下划线，再处理连续大写
-s1=re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', name)
-s2=re.sub(r'([A-Z]+)([A-Z][a-z])', r'\1_\2', s1)
-print(s2.lower())
-PY
-"$operator_name")
+    local operator_snake=$(to_snake "$operator_name")
     local reference_ut="$REFERENCE_UT_DIR/test_${operator_snake}.cpp"
     if [ ! -f "$reference_ut" ]; then
         echo "❌ 参考UT不存在: $reference_ut" | tee -a "$log_file"
@@ -205,7 +209,7 @@ PY
 
     # 3) 调用转换脚本，输出写入当前 run_dir，保持原有目录结构
     echo "🚚 使用 convert_ut_from_xlsx.py 生成UT..." | tee -a "$log_file"
-    if python3 "$CONVERT_UT_FROM_XLSX" \
+    if CASE_TEMPLATE_DIR="$CASE_TEMPLATE_DIR" python3 "$CONVERT_UT_FROM_XLSX" \
         --ref "$reference_ut" \
         --xlsx "$xlsx_file" \
         --op "$operator_name" \

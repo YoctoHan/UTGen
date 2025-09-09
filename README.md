@@ -132,7 +132,17 @@ utgen-v2/
 2. **一般示例**：放在 `test-examples/` 目录
    - 提供测试代码结构参考
 
-### 自定义模板
+### 自定义测例模板（按算子选择）
+
+支持为不同算子提供不同的测例模板：
+
+- 模板目录：`CASE_TEMPLATE_DIR`（默认 `./case-templates`）
+- 搜索顺序：`<CamelCase>.py` → `<snake_case>.py` → `default.py` → 内置默认
+- 导出接口（二选一）：
+  - 函数：`render_test_case(op_name, spec, idx, helpers)` 或三参版本
+  - 类：`Template`，方法 `render_test_case(self, op_name, spec, idx, helpers)`
+
+helpers 包含：`ensure_shapes(spec)`、`dtype_to_ge(dtype)`、`logger`
 
 编辑 `ut-template/ut_template.cpp` 来定制生成的单测代码结构。
 

@@ -6,6 +6,7 @@
 """
 
 import sys
+import os
 import json
 import csv
 import io
@@ -46,9 +47,10 @@ def load_fewshot_examples(fewshot_file: str) -> str:
 class TestcasePromptGenerator:
     """测试用例提示词生成器"""
     
-    def __init__(self, model_caller: ModelCaller):
+    def __init__(self, model_caller: ModelCaller, special_reqs_dir: Optional[str] = None):
         self.template = self._load_template()
         self.model_caller = model_caller
+        self.special_reqs_dir = Path(special_reqs_dir) if special_reqs_dir else None
     
     def _load_template(self) -> str:
         """加载提示词模板"""
@@ -84,22 +86,7 @@ class TestcasePromptGenerator:
 - 数值参数使用合理的范围和步长
 
 ## 特殊要求
-
-### tiling-key 取值范围说明
-
-- **是否带 bias**  
-  - 不带 bias：不加额外值  
-  - 带 bias（存在第 3 个可选输入）：`+1`
-
-- **是否 ND2NZ**  
-  - 当前实现固定为 `1` （`SetSocParam` 将 `isND2NZ` 置为 `1`）：`+10`
-
-- **通信算法**  
-  - 当前实现固定为 `FULL_MESH`（`SetCommAlg`）：`+100`
-
-### 计算规则
-- **不带 bias** → `tilingKey = 110`  
-- **带 bias** → `tilingKey = 111`
+{special_requirements_section}
 
 
 ### 4. 输出格式
@@ -131,44 +118,69 @@ boundary_min,1,1,1,...
         # 生成源码部分
         source_code_section = self._generate_source_section(source_paths)
        
-        # 分析算子特征
-        operator_analysis = self._analyze_operator(source_code_section)
-        # breakpoint()
+        # 消融模型的“分析算子特征”调用
         # 生成示例部分
         examples_section = self._generate_examples_section(fewshot_content)
 
-        # 生成特殊注意事项
-        # operator_analysis = self._generate_special_notes(operator_name, operator_info)
+        # 生成“特殊要求”部分：按算子名从目录读取
+        special_requirements_section = self._generate_special_requirements(operator_name)
         
         # 填充模板
         prompt = self.template.format(
             operator_name=operator_name,
-            operator_analysis=operator_analysis,
             source_code_section=source_code_section,
             examples_section=examples_section,
+            special_requirements_section=special_requirements_section,
         )
         return prompt
     
-    def _analyze_operator(self, source_code_section: str) -> str:
-        """分析算子特征"""
-        
-        system_message = """你是一位资深的AI算子开发专家，精通各类深度学习框架的CANN算子实现。
-        你具备以下专业能力：
-        - 深入理解算子的计算逻辑和优化策略
-        - 熟悉tiling技术在算子性能优化中的应用
-        - 能够准确识别和解释代码中的关键参数含义"""
-        
-        prompt = f"""请分析以下算子源代码，重点关注tiling相关的实现：
-    源代码：
-    {source_code_section}
-    请做以下分析：
-1. 识别代码中和tiling key相关的代码
-2. 解释每个tiling key的具体含义和作用
+    def _generate_special_requirements(self, operator_name: str) -> str:
+        """按算子名从目录读取“特殊要求”文本。
 
-输出格式要求：
-- 枚举可能出现的 tiling key，并给出其含义。"""
-        response = self.model_caller.call(prompt, system_message, temperature=0.3)  # 降低temperature以获得更准确的技术分析
-        return response
+        优先匹配同名文件（不区分大小写），支持 .md/.txt；
+        若找不到，查找 DEFAULT.md/DEFAULT.txt；若仍未找到，给出提示占位。
+        """
+        if not self.special_reqs_dir:
+            return "未提供特殊要求"
+
+        try:
+            if not self.special_reqs_dir.exists():
+                return f"未找到特殊要求目录: {self.special_reqs_dir}"
+
+            # 生成候选名（大小写不敏感）
+            op_lower = operator_name.lower()
+
+            candidates = []
+            for path in self.special_reqs_dir.iterdir():
+                if not path.is_file():
+                    continue
+                stem_lower = path.stem.lower()
+                suffix_lower = path.suffix.lower()
+                if suffix_lower not in {'.md', '.txt'}:
+                    continue
+                if stem_lower == op_lower:
+                    candidates.append(path)
+
+            # 精确匹配优先
+            target_file = candidates[0] if candidates else None
+
+            # 回退到 DEFAULT
+            if target_file is None:
+                for default_name in ('DEFAULT.md', 'default.md', 'DEFAULT.txt', 'default.txt'):
+                    p = self.special_reqs_dir / default_name
+                    if p.exists() and p.is_file():
+                        target_file = p
+                        break
+
+            if target_file is None:
+                return "未找到与该算子匹配的特殊要求"
+
+            content = read_file_content(str(target_file))
+            return content if content.strip() else "未找到与该算子匹配的特殊要求"
+
+        except Exception as exc:
+            logger.warning(f"读取特殊要求失败: {exc}")
+            return "未能读取特殊要求"
 
     def _generate_source_section(self, source_paths: List[str]) -> str:
         """生成源码部分"""
@@ -351,8 +363,9 @@ def generate_testcase_params(operator_name: str, source_paths: List[str],
     if not fewshot_content:
         logger.warning("未能加载few-shot示例，将仅基于源码生成")
     
-    # 初始化提示词生成器
-    prompt_generator = TestcasePromptGenerator(model_caller)
+    # 初始化提示词生成器（支持从环境变量读取特殊要求目录）
+    special_reqs_dir = os.environ.get('SPECIAL_REQS_DIR')
+    prompt_generator = TestcasePromptGenerator(model_caller, special_reqs_dir=special_reqs_dir)
     
     # 生成prompt
     logger.info("📝 生成测试参数生成prompt...")
