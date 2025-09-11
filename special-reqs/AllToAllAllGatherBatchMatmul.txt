@@ -1,0 +1,42 @@
+### tiling-key 取值范围说明
+- **基础偏移量**
+ - 固定为 INIT_TILINGKEY = 1000000000000000000
+
+- **X Shard 类型（commonTiling.get_xShardFlag()**
+ - 0：+0
+ - 1：+1
+
+- **权重是否转置（commonTiling.get_isWeightTrans()**
+ - 未转置：+0
+ - 转置：+10
+
+- **是否带 bias（存在可选输入 BIAS，commonTiling.get_isBias()**
+ - 不带：+0
+ - 带：+100
+
+- **输出需求标志（y2Flag / y3Flag**
+ - 都不需要：+0
+ - 仅需要 Y2：+1000
+ - 仅需要 Y3：+2000
+ - 同时需要 Y2 与 Y3：+3000
+
+- **通信算法**
+ - AlltoAll 使用 "level0:fullmesh;level1:pairwise"，AllGather 使用 "level0:ring"（见 SetHcclTilingData）
+ - 仅用于通信配置，不计入 tiling-key
+
+- **其他**
+ - 激活类型（actType）参与校验与 UB 规划，但不计入 tiling-key
+ - 未涉及 ND2NZ 相关项
+
+### 计算规则
+- 通用公式：
+tilingKey = 1000000000000000000 + (xShard==1 ? 1 : 0) + (isWeightTrans ? 10 : 0) + (isBias ? 100 : 0) + outputInc
+- 其中 outputInc ∈ {0, 1000, 2000, 3000}，由 y2Flag / y3Flag 决定
+
+### 示例
+- xShard=1，未转置，无 bias，仅 Y1：
+1000000000000000000 + 1 = 1000000000000000001
+- xShard=1，转置，有 bias，同时输出 Y2 与 Y3：
+1000000000000000000 + 1 + 10 + 100 + 3000 = 1000000000000003111
+- xShard=0，未转置，有 bias，仅 Y3：
+1000000000000000000 + 0 + 0 + 100 + 2000 = 1000000000000002100

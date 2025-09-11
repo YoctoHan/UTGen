@@ -1,0 +1,54 @@
+### tiling-key 取值范围说明
+
+- **A3 路径（非 910B）基础偏移量**  
+  - `BASE_A3 = 1000`
+
+- **A2 路径（910B）基础偏移量**  
+  - `BASE_A2 = 2000001000`（由 `TILING_KEY_BASE_A2 + INIT_TILINGKEY` 得到）  
+  - 分层通信（Layered）额外偏移：`+100000000`
+
+- **量化模式（quantMode）**  
+  - UnQuant（0）：`+0`  
+  - Static（1）：`+1`  
+  - Dynamic（2）：`+2`
+
+- **是否提供 scales（有可选输入 scales）**  
+  - 否：`+0`  
+  - 是：`+10`
+
+- **TP 并行规模（仅 A3）**  
+  - `tpWorldSize != 2`：`+0`  
+  - `tpWorldSize == 2`：`+100`
+
+- **是否带 bias / 是否 ND2NZ**  
+  - 本算子未涉及：不计入
+
+- **通信算法（不计入 tiling-key）**  
+  - A3：AlltoAll=`level0:fullmesh;level1:pairwise`，AllGather=`level0:ring`  
+  - A2：BatchWrite=`level0:fullmesh`
+
+### 计算规则
+- A3：  
+  `tilingKey = 1000 + quantMode + (hasScales ? 10 : 0) + (tpWorldSize == 2 ? 100 : 0)`
+
+- A2（非 Layered）：  
+  `tilingKey = 2000001000 + quantMode + (hasScales ? 10 : 0)`
+
+- A2（Layered）：  
+  `tilingKey = 2100001000 + quantMode + (hasScales ? 10 : 0)`
+
+### 示例
+- A3：UnQuant，无 scales，tp=1  
+  `1000`
+- A3：UnQuant，无 scales，tp=2  
+  `1000 + 100 = 1100`
+- A3：Static Quant，有 scales，tp=1  
+  `1000 + 1 + 10 = 1011`
+- A3：Dynamic Quant，有 scales，tp=2  
+  `1000 + 2 + 10 + 100 = 1112`
+- A2：UnQuant（非 Layered），无 scales  
+  `2000001000`
+- A2：Dynamic Quant（非 Layered），有 scales  
+  `2000001000 + 2 + 10 = 2000001012`
+- A2：Dynamic Quant（Layered），有 scales  
+  `2100001000 + 2 + 10 = 2100001012`

@@ -1,0 +1,33 @@
+### tiling-key 取值范围说明
+- **基础偏移量**
+ - 固定为 INIT_TILINGKEY = 1000000000000000000
+- **Y Shard 类型（commonTiling.get_yShardFlag()）**
+ - 0：+0
+ - 1：+1
+- **权重是否转置（commonTiling.get_isWeightTrans()）**
+ - 未转置：+0
+ - 转置：+10
+- **是否带 bias（存在可选输入 BIAS，commonTiling.get_isBias()）**
+ - 不带：+0
+ - 带：+100
+- **LITE 策略（isLite）**
+ - 条件：(C/tp <= 640) 且 yShard==1 → +1000
+ - 否则：+0
+- **通信算法（不计入 tiling-key）**
+ - ReduceScatter："level0:ring"
+ - AlltoAll："level0:fullmesh;level1:pairwise"
+### 其他
+- 未涉及 ND2NZ：不计入
+- 激活类型、数据类型：不计入
+### 计算规则
+- 通用公式：
+tilingKey = 1000000000000000000 + (yShard==1 ? 1 : 0) + (isWeightTrans ? 10 : 0) + (isBias ? 100 : 0) + (isLite ? 1000 : 0)
+### 示例
+- yShard=0，未转置，无 bias，非 LITE：
+1000000000000000000
+- yShard=1，转置，有 bias，非 LITE：
+1000000000000000000 + 1 + 10 + 100 = 1000000000000000111
+- yShard=1，转置，有 bias，LITE：
+1000000000000000000 + 1 + 10 + 100 + 1000 = 1000000000000001111
+- yShard=1，未转置，无 bias，LITE：
+1000000000000000000 + 1 + 1000 = 1000000000000001001

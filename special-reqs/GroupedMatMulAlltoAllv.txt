@@ -1,0 +1,36 @@
+### tiling-key 取值范围说明
+
+- **基础偏移量**  
+  - A3 路径：`BASE = 0`  
+  - A5 路径：`BASE = 1000000000000000000`
+
+- **是否执行可选 MatMul（`isOptionalMatmul`）**  
+  - 否：`+0`  
+  - 是：`+1`
+
+- **GMM 权重是否转置（`isGmmWeightTrans`）**  
+  - 未转置：`+0`  
+  - 转置：`+10`
+
+- **MM 权重是否转置（`isMmWeightTrans`）**  
+  - 未转置：`+0`  
+  - 转置：`+100`
+
+- **是否带 bias / 是否 ND2NZ**  
+  - 本算子未涉及 bias 与 ND2NZ：不计入
+
+- **通信算法**  
+  - A3：`AllGather`/`AllToAllV` 方案由内部配置决定，未编码进 tiling-key  
+  - A5：`AlltoAllV`（HCCL_CMD_ALLTOALLV），未编码进 tiling-key
+
+### 计算规则
+- 通用公式：  
+  `tilingKey = BASE + (isOptionalMatmul ? 1 : 0) + (isGmmWeightTrans ? 10 : 0) + (isMmWeightTrans ? 100 : 0)`
+
+### 示例
+- A3：可选 MatMul、GMM 权重转置、MM 权重不转置  
+  `0 + 1 + 10 + 0 = 11`
+- A3：无可选 MatMul、GMM 权重不转置、MM 权重转置  
+  `0 + 0 + 0 + 100 = 100`
+- A5：可选 MatMul、GMM 权重与 MM 权重均转置  
+  `1000000000000000000 + 1 + 10 + 100 = 1000000000000000111`

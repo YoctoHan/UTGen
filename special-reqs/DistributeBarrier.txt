@@ -1,0 +1,12 @@
+### tiling-key 取值范围说明
+- **基础偏移量**
+ - 固定为 INIT_TILINGKEY = 10000
+- **是否带 bias**
+ - 本算子无 bias 输入与相关逻辑：不计入
+- **是否 ND2NZ**
+ - 未涉及：不计入
+- **通信算法**
+ - 固定为 AlltoAll=level0:fullmesh;level1:pairwise（见 SetHcommCfg）
+ - 仅用于通信配置，不计入 tiling-key
+### 计算规则
+ - 统一固定值：tilingKey = 10000
