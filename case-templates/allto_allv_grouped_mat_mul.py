@@ -174,26 +174,26 @@ def render_test_case(op_name, spec, idx, helpers=None):
     lines.append("                      .OutputShapes(<LB>" + ", ".join(output_shapes_parts) + "<RB>)")
     # Node Attrs
     lines.append("                      .NodeAttrs(<LB>" + ", ".join([
-        "<LB>\\\"group\\\", ge::AnyValue::CreateFrom<std::string>(group)<RB>",
-        f"<LB>\\\"ep_world_size\\\", ge::AnyValue::CreateFrom<int64_t>({ep_world_size})<RB>",
-        "<LB>\\\"send_counts\\\", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)<RB>",
-        "<LB>\\\"recv_counts\\\", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)<RB>",
-        f"<LB>\\\"trans_gmm_weight\\\", ge::AnyValue::CreateFrom<bool>({'true' if trans_gmm_weight else 'false'})<RB>",
-        f"<LB>\\\"trans_mm_weight\\\", ge::AnyValue::CreateFrom<bool>({'true' if trans_mm_weight else 'false'})<RB>",
-        f"<LB>\\\"permute_out_flag\\\", ge::AnyValue::CreateFrom<bool>({'true' if permute_out_flag else 'false'})<RB>",
-    ]) + "><RB>)")
+        "<LB>\"group\", ge::AnyValue::CreateFrom<std::string>(group)<RB>",
+        f"<LB>\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>({ep_world_size})<RB>",
+        "<LB>\"send_counts\", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)<RB>",
+        "<LB>\"recv_counts\", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)<RB>",
+        f"<LB>\"trans_gmm_weight\", ge::AnyValue::CreateFrom<bool>({'true' if trans_gmm_weight else 'false'})<RB>",
+        f"<LB>\"trans_mm_weight\", ge::AnyValue::CreateFrom<bool>({'true' if trans_mm_weight else 'false'})<RB>",
+        f"<LB>\"permute_out_flag\", ge::AnyValue::CreateFrom<bool>({'true' if permute_out_flag else 'false'})<RB>",
+    ]) + "<RB>)")
     lines.append("                      .CompileInfo(&compile_info)")
     lines.append("                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))")
     # 输入/输出类型映射：0 FP16, 1 FP16, 2 INT64, 3 INT64, 4 FP16, 5 FP16；输出均 FP16
-    lines.append(f"                      .NodeInputTd(0, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append(f"                      .NodeInputTd(1, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append("                      .NodeInputTd(2, ge::DT_INT64, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append("                      .NodeInputTd(3, ge::DT_INT64, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append(f"                      .NodeInputTd(4, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append(f"                      .NodeInputTd(5, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append("                      .NodeOutputTd(0, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append("                      .NodeOutputTd(1, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
-    lines.append("                      .NodeOutputTd(2, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append(f"                      .NodeInputTd(0, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append(f"                      .NodeInputTd(1, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append("                      .NodeInputTd(2, ge::DT_INT64, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append("                      .NodeInputTd(3, ge::DT_INT64, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append(f"                      .NodeInputTd(4, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append(f"                      .NodeInputTd(5, {dt_fp16}, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append("                      .NodeOutputTd(0, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append("                      .NodeOutputTd(1, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
+    # lines.append("                      .NodeOutputTd(2, ge::DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)")
     lines.append("                      .TilingData(param.get())")
     lines.append("                      .Workspace(ws_size)")
     lines.append("                      .Build();")
