@@ -6,9 +6,13 @@ def render_test_case(op_name, spec, idx, helpers=None):
     ensure_shapes = helpers["ensure_shapes"] if helpers else None
     dtype_to_ge = helpers["dtype_to_ge"] if helpers else None
 
-    # 形状：优先使用 ensure_shapes 提供的 x1/x2/out
+    # 形状：优先使用从 xlsx 解析得到的显式形状（避免强依赖 m/k/n）
     # x1 -> expand_x，x2 -> expert_ids，out -> x_output
-    if ensure_shapes:
+    if getattr(spec, "x1_shape", None) and getattr(spec, "x2_shape", None):
+        x1 = spec.x1_shape
+        x2 = spec.x2_shape
+        out = getattr(spec, "output_shape", None) or x1
+    elif ensure_shapes:
         x1, x2, _go, out, _bias = ensure_shapes(spec)
     else:
         x1 = getattr(spec, "x1", (64, 7168))

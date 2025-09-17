@@ -249,8 +249,11 @@ def parse_dtype_list(value: Any) -> List[str]:
 
 def dtype_to_ge(dtype: str) -> Tuple[str, str]:
     s = (dtype or "").strip().lower()
-    if s in {"bf16", "bfloat16"}:
+    # 兼容多种写法
+    if s in {"bf16", "bfloat16", "dt_bf16"}:
         return ("DT_BF16", "DT_BF16")
+    if s in {"float16", "fp16", "dt_float16"}:
+        return ("DT_FLOAT16", "DT_FLOAT16")
     # 默认 float16
     return ("DT_FLOAT16", "DT_FLOAT16")
 
@@ -309,11 +312,12 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
     n = parse_int(n, None) if n is not None else None
 
     # 形状（可选）
-    # 兼容列别名：x_shape -> x1_shape，expert_ids_shape -> x2_shape
-    x1_shape = parse_shape(row.get("x1_shape") or row.get("x_shape")) or None
+    # 兼容列别名：x_shape/expand_x_shape -> x1_shape，expert_ids_shape -> x2_shape
+    x1_shape = parse_shape(row.get("x1_shape") or row.get("x_shape") or row.get("expand_x_shape")) or None
     x2_shape = parse_shape(row.get("x2_shape") or row.get("expert_ids_shape")) or None
     go_shape = parse_shape(row.get("gather_output_shape") or row.get("gather_out_shape")) or None
-    out_shape = parse_shape(row.get("output_shape")) or None
+    out_shape = parse_shape(row.get("output_shape") or row.get("x_output_shape") or row.get("output_x_shape")) or None
+    shared_expert_x = parse_shape(row.get("shared_expert_x_shape")) or None
 
     # 如果提供了 input_tensor_shape（形如 [[M,K],[K,N],[N]]），优先使用
     inputs = parse_shape_list(row.get("input_tensor_shape"))
@@ -330,14 +334,16 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
                 pass
 
     # 布尔/标量
-    # dtype 优先使用 output_dtype，其次 input_tensor_dtype 第一项，否则 dtype 列
+    # dtype 优先使用 expand_x_dtype，其次 input_tensor_dtype/output_dtype，最后 dtype 列
     dtype_list_out = parse_dtype_list(row.get("output_dtype"))
     dtype_list_in = parse_dtype_list(row.get("input_tensor_dtype"))
     dtype = (
-        (dtype_list_out[0] if dtype_list_out else None)
-        or (dtype_list_in[0] if dtype_list_in else None)
-        or str(row.get("dtype") or row.get("DType") or "float16")
-    )
+        str(row.get("expand_x_dtype")).strip() if row.get("expand_x_dtype") else None
+    ) or (
+        dtype_list_in[0] if dtype_list_in else None
+    ) or (
+        dtype_list_out[0] if dtype_list_out else None
+    ) or str(row.get("dtype") or row.get("DType") or "float16")
     is_trans_a = parse_bool(row.get("is_trans_a") or row.get("transpose_a") or False)
     is_trans_b = parse_bool(row.get("is_trans_b") or row.get("transpose_b") or False)
     # has_bias: 仅由 xlsx 的 is_bias 字段决定，不再进行额外推断
@@ -377,7 +383,7 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
     expert_token_nums_type = parse_int(row.get("expert_token_nums_type"), None)
     short_soc_version = str(row.get("soc_version")).strip() if row.get("soc_version") is not None else None
 
-    return CaseSpec(
+    spec = CaseSpec(
         name=name,
         m=m,
         k=k,
@@ -412,6 +418,13 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
         expert_token_nums_type=expert_token_nums_type,
         short_soc_version=short_soc_version,
     )
+    # 附加可选字段：shared_expert_x（模板 MoeDistributeCombineV2 使用）
+    if shared_expert_x is not None:
+        try:
+            setattr(spec, "shared_expert_x", shared_expert_x)
+        except Exception:
+            pass
+    return spec
 
 
 def ensure_shapes(spec: CaseSpec) -> Tuple[Tuple[int, int], Tuple[int, int], Optional[Tuple[int, int]], Tuple[int, int], Optional[Tuple[int]]]:

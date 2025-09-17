@@ -314,12 +314,60 @@ def validate_csv_format(lines: List[str]) -> List[str]:
             try:
                 reader = csv.reader(io.StringIO(line))
                 fields = next(reader)
+                # 若表头包含 op_type 且当前行第二列像形状（以括号/中括号/花括号开头），则在索引1插入空占位，纠正列左移
+                try:
+                    if i > 0 and len(first_row_fields) >= 2 and first_row_fields[1].strip().lower() == 'op_type':
+                        if len(fields) >= 2 and fields[1].strip().startswith(('[', '{', '(')):
+                            fields.insert(1, '')
+                except Exception:
+                    pass
+                # 合并未加引号的括号/中括号/花括号中的逗号，避免被误拆分为多列
+                def _merge_bracket_groups(tokens: List[str]) -> List[str]:
+                    merged: List[str] = []
+                    buf: List[str] = []
+                    open_ch = ''
+                    close_ch = ''
+                    balance = 0
+                    def counts(s: str, ch_open: str, ch_close: str) -> int:
+                        return s.count(ch_open) - s.count(ch_close)
+                    for t in tokens:
+                        st = t.strip()
+                        if balance == 0 and st and st[0] in '[{(': 
+                            open_ch = st[0]
+                            close_ch = { '[': ']', '{': '}', '(': ')' }[open_ch]
+                            balance = counts(st, open_ch, close_ch)
+                            buf = [t]
+                            if balance <= 0:
+                                merged.append("".join(buf).strip())
+                                buf = []
+                                open_ch = close_ch = ''
+                                balance = 0
+                            continue
+                        if balance > 0:
+                            buf.append(t)
+                            balance += counts(st, open_ch, close_ch)
+                            if balance <= 0:
+                                merged.append(",".join(buf).strip())
+                                buf = []
+                                open_ch = close_ch = ''
+                                balance = 0
+                            continue
+                        merged.append(t)
+                    if buf:
+                        merged.append(",".join(buf).strip())
+                    return merged
+                fields = _merge_bracket_groups(fields)
                 
-                # 严格检查列数一致性
-                if len(fields) == expected_columns:
-                    valid_lines.append(line)
-                else:
+                # 列数自适应：多的裁剪，少的补空
+                if len(fields) != expected_columns:
                     logger.warning(f"第{i+1}行列数不匹配: 期望{expected_columns}列，实际{len(fields)}列")
+                    if len(fields) > expected_columns:
+                        fields = fields[:expected_columns]
+                    else:
+                        fields = fields + [""] * (expected_columns - len(fields))
+                    # 重构该行
+                    line = ",".join(fields)
+                valid_lines.append(line)
                     
             except Exception as e:
                 logger.warning(f"第{i+1}行解析失败: {e}")
