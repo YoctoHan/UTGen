@@ -1,0 +1,703 @@
+[2025-09-17 15:06:55] [ 42%] Building CXX object ops/built-in/op_tiling/CMakeFiles/optiling_llt.dir/__/__/ops-conv/conv3d_backprop_input_v2/op_host/op_tiling/arch32/conv3d_dx_v2_basic_block_tiling.cc.o
+[2025-09-17 15:06:55] [ 42%] Building CXX object ops/built-in/op_tiling/CMakeFiles/optiling_llt.dir/__/__/ops-conv/conv3d_transpose_v2/op_host/op_tiling/arch32/conv3d_transpose_v2_tiling.cc.o
+[2025-09-17 15:09:36] [ 42%] Linking CXX shared library liboptiling_llt.so
+[2025-09-17 15:12:42] [ 60%] Built target optiling_llt
+[2025-09-17 15:12:42] [ 60%] Check ops op_tiling output
+readelf: Warning: unable to apply unsupported reloc type 21 to section .debug_info
+readelf: Warning: unable to apply unsupported reloc type 21 to section .debug_info
+[2025-09-17 15:13:30] [INFO]No symbols appear more than once with different sizes
+[2025-09-17 15:13:30] [ 60%] Built target custom_check_output
+[2025-09-17 15:13:33] Consolidate compiler generated dependencies of target ops_cpp_op_tiling_utest
+[2025-09-17 15:13:34] [ 60%] Building CXX object ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_moe_distribute_dispatch.cpp.o
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_basic_a3_unquant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:98:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:98:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:98:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:114:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:114:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:116:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:116:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:117:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:117:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:118:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:118:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:119:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:119:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:121:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:121:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_basic_a3_static_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:193:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:193:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:193:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:209:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:209:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:211:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:211:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:212:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:212:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:213:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:213:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:214:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:214:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:216:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:216:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_basic_a3_dynamic_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:288:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:288:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:288:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:304:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:304:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:306:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:306:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:307:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:307:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:308:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:308:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:309:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:309:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:311:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:311:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a3_tp2_unquant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:383:560: error: ‘None’ was not declared in this scope
+ (2)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:383:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:383:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:399:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:399:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:401:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:401:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:402:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:402:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:403:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:403:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:404:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:404:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:406:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:406:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a3_tp2_static_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:478:560: error: ‘None’ was not declared in this scope
+ (2)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:478:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:478:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:494:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:494:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:496:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:496:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:497:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:497:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:498:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:498:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:499:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:499:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:501:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:501:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a2_unquant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:573:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:573:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:573:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:589:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:589:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:591:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:591:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:592:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:592:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:593:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:593:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:594:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:594:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:596:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:596:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a2_static_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:668:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:668:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:668:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(1)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:684:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:684:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:686:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:686:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:687:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:687:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:688:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:688:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:689:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:689:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:691:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:691:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a2_dynamic_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:763:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:763:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:763:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:779:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:779:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:781:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:781:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:782:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:782:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:783:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:783:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:784:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:784:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:786:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:786:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a2_layered_unquant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:858:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:858:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:858:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:874:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:874:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:876:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:876:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:877:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:877:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:878:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:878:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:879:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:879:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:881:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:881:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_a2_layered_dynamic_quant_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:953:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:953:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:953:808: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ nt64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(2)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(128)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:969:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:969:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:971:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:971:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:972:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:972:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:973:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:973:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:974:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:974:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:976:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:976:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_boundary_min_bs_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1048:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(8)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1048:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1048:806: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ <int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(8)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1064:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1064:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1066:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1066:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1067:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1067:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1068:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1068:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1069:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1069:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1071:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1071:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp: In member function ‘virtual void MoeDistributeDispatchTiling_moe_distribute_dispatch_boundary_max_bs_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1143:560: error: ‘None’ was not declared in this scope
+ (1)}, {"tp_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"expert_shard_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"shared_expert_num", ge::AnyValue::CreateFrom<int64_t>(None)}, {"shared_expert_rank_num", ge::AnyValue::CreateFrom<int64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(4096)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                                                                                                                                                                                  ^~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1143:560: note: suggested alternative:
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:67,
+                 from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:6:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-type-util.h:112:8: note:   ‘testing::internal::None’
+ struct None {};
+        ^~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1143:809: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ t64_t>(0)}, {"quant_mode", ge::AnyValue::CreateFrom<int64_t>(0)}, {"global_bs", ge::AnyValue::CreateFrom<int64_t>(4096)}, {"expert_token_nums_type", ge::AnyValue::CreateFrom<int64_t>(0)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:10:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1159:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1159:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1161:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1161:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1162:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1162:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1163:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1163:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1164:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1164:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1166:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_moe_distribute_dispatch.cpp:1166:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+make[3]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_moe_distribute_dispatch.cpp.o] Error 1
+[2025-09-17 15:13:39] ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/build.make:7243: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_moe_distribute_dispatch.cpp.o' failed
+make[2]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/all] Error 2
+[2025-09-17 15:13:39] CMakeFiles/Makefile2:4002: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/all' failed
+make[1]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/rule] Error 2
+[2025-09-17 15:13:39] CMakeFiles/Makefile2:4009: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/rule' failed
+make: *** [ops_cpp_op_tiling_utest] Error 2
+[2025-09-17 15:13:39] Makefile:417: recipe for target 'ops_cpp_op_tiling_utest' failed
