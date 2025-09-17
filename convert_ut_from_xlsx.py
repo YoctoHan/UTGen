@@ -277,6 +277,24 @@ class CaseSpec:
     output_shape: Optional[Tuple[int, int]] = None
     # bias 长度（可选，若提供则覆盖默认 out_n）
     bias_len: Optional[int] = None
+    # 额外字段（为各算子模板提供注入能力）
+    group_ep: str = "ep_group"
+    group_tp: str = "tp_group"
+    ep_world_size: Optional[int] = None
+    ep_rank_id: Optional[int] = None
+    moe_expert_num: Optional[int] = None
+    tp_world_size: Optional[int] = None
+    tp_rank_id: Optional[int] = None
+    expert_shard_type: Optional[int] = None
+    shared_expert_num: Optional[int] = None
+    shared_expert_rank_num: Optional[int] = None
+    global_bs: Optional[int] = None
+    out_dtype: Optional[int] = None
+    comm_quant_mode: Optional[int] = None
+    quant_mode: Optional[int] = None
+    group_list_type: Optional[int] = None
+    expert_token_nums_type: Optional[int] = None
+    short_soc_version: Optional[str] = None
 
 
 def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
@@ -291,8 +309,9 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
     n = parse_int(n, None) if n is not None else None
 
     # 形状（可选）
-    x1_shape = parse_shape(row.get("x1_shape")) or None
-    x2_shape = parse_shape(row.get("x2_shape")) or None
+    # 兼容列别名：x_shape -> x1_shape，expert_ids_shape -> x2_shape
+    x1_shape = parse_shape(row.get("x1_shape") or row.get("x_shape")) or None
+    x2_shape = parse_shape(row.get("x2_shape") or row.get("expert_ids_shape")) or None
     go_shape = parse_shape(row.get("gather_output_shape") or row.get("gather_out_shape")) or None
     out_shape = parse_shape(row.get("output_shape")) or None
 
@@ -341,6 +360,23 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
         parse_int(expected_tiling_key, None) if expected_tiling_key is not None else None
     )
 
+    # 额外字段注入：从常见列中提取（不存在则为 None）
+    ep_world_size = parse_int(row.get("ep_world_size"), None)
+    ep_rank_id = parse_int(row.get("ep_rank_id"), None)
+    moe_expert_num = parse_int(row.get("moe_expert_num"), None)
+    tp_world_size = parse_int(row.get("tp_world_size"), None)
+    tp_rank_id = parse_int(row.get("tp_rank_id"), None)
+    expert_shard_type = parse_int(row.get("expert_shard_type"), None)
+    shared_expert_num = parse_int(row.get("shared_expert_num"), None)
+    shared_expert_rank_num = parse_int(row.get("shared_expert_rank_num"), None)
+    global_bs = parse_int(row.get("global_bs"), None)
+    out_dtype = parse_int(row.get("out_dtype"), None)
+    comm_quant_mode = parse_int(row.get("comm_quant_mode"), None)
+    quant_mode = parse_int(row.get("quant_mode"), None)
+    group_list_type = parse_int(row.get("group_list_type"), None)
+    expert_token_nums_type = parse_int(row.get("expert_token_nums_type"), None)
+    short_soc_version = str(row.get("soc_version")).strip() if row.get("soc_version") is not None else None
+
     return CaseSpec(
         name=name,
         m=m,
@@ -360,15 +396,31 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
         gather_output_shape=go_shape,
         output_shape=out_shape,
         bias_len=bias_len,
+        ep_world_size=ep_world_size,
+        ep_rank_id=ep_rank_id,
+        moe_expert_num=moe_expert_num,
+        tp_world_size=tp_world_size,
+        tp_rank_id=tp_rank_id,
+        expert_shard_type=expert_shard_type,
+        shared_expert_num=shared_expert_num,
+        shared_expert_rank_num=shared_expert_rank_num,
+        global_bs=global_bs,
+        out_dtype=out_dtype,
+        comm_quant_mode=comm_quant_mode,
+        quant_mode=quant_mode,
+        group_list_type=group_list_type,
+        expert_token_nums_type=expert_token_nums_type,
+        short_soc_version=short_soc_version,
     )
 
 
 def ensure_shapes(spec: CaseSpec) -> Tuple[Tuple[int, int], Tuple[int, int], Optional[Tuple[int, int]], Tuple[int, int], Optional[Tuple[int]]]:
     """根据 m,k,n 和 flags 计算或补全形状。返回：(x1_shape, x2_shape, gather_output_shape, output_shape, bias_shape)"""
-    if spec.x1_shape and spec.x2_shape and spec.output_shape:
+    # 优先：若给出 x1/x2，允许 output_shape 缺省，回退为 x1
+    if spec.x1_shape and spec.x2_shape:
         x1 = spec.x1_shape
         x2 = spec.x2_shape
-        out = spec.output_shape
+        out = spec.output_shape or x1
         go = spec.gather_output_shape or x1
     else:
         if spec.m is None or spec.k is None or spec.n is None:
@@ -377,8 +429,8 @@ def ensure_shapes(spec: CaseSpec) -> Tuple[Tuple[int, int], Tuple[int, int], Opt
         x1 = (m, k)
         # B 维度：is_trans_b=True 时 (N,K)，否则 (K,N)
         x2 = (n, k) if spec.is_trans_b else (k, n)
-        out = (m, n)
-        go = (m, k)
+        out = spec.output_shape or (m, n)
+        go = spec.gather_output_shape or (m, k)
     if spec.has_bias:
         if spec.bias_len is not None:
             bias_shape = (int(spec.bias_len),)

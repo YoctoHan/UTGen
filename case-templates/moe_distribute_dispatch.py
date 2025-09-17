@@ -6,9 +6,12 @@ def render_test_case(op_name, spec, idx, helpers=None):
     ensure_shapes = helpers["ensure_shapes"] if helpers else None
     dtype_to_ge = helpers["dtype_to_ge"] if helpers else None
 
-    # 形状来源：沿用 ensure_shapes 的前两项作为输入形状
-    # x1 -> expand_x，x2 -> expert_ids；其余输出形状根据 spec 或推导
-    if ensure_shapes:
+    # 形状来源优先级：显式 x1/x2 -> ensure_shapes(spec) -> 兜底
+    if getattr(spec, "x1_shape", None) and getattr(spec, "x2_shape", None):
+        x1 = spec.x1_shape
+        x2 = spec.x2_shape
+        out = getattr(spec, "output_shape", None) or x1
+    elif ensure_shapes:
         x1, x2, _go, out, _bias = ensure_shapes(spec)
     else:
         # 兜底：从 spec 读取或给出占位形状
