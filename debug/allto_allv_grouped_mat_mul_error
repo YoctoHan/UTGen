@@ -1,0 +1,805 @@
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:438:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_basic_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:494:207: error: ‘send_counts’ was not declared in this scope
+ trs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:494:280: error: ‘recv_counts’ was not declared in this scope
+ size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:494:476: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:501:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:501:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:503:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:503:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:504:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:504:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:505:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:505:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:506:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:506:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:508:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:508:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:522:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_gmm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_gmm_w_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:578:208: error: ‘send_counts’ was not declared in this scope
+ rs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(16)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:578:281: error: ‘recv_counts’ was not declared in this scope
+ ize", ge::AnyValue::CreateFrom<int64_t>(16)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:578:477: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:585:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:585:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:587:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:587:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:588:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:588:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:589:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:589:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:590:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:590:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:592:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:592:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:606:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_trans_mm_w) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_trans_mm_w_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:662:208: error: ‘send_counts’ was not declared in this scope
+ rs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(32)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:662:281: error: ‘recv_counts’ was not declared in this scope
+ ize", ge::AnyValue::CreateFrom<int64_t>(32)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:662:477: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:669:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:669:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:671:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:671:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:672:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:672:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:673:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:673:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:674:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:674:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:676:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:676:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:690:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_trans_both) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_both_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:746:207: error: ‘send_counts’ was not declared in this scope
+ trs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:746:280: error: ‘recv_counts’ was not declared in this scope
+ size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:746:476: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:753:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:753:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:755:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:755:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:756:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:756:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:757:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:757:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:758:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:758:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:760:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:760:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:774:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_large_mm) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_large_mm_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:830:208: error: ‘send_counts’ was not declared in this scope
+ rs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(16)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:830:281: error: ‘recv_counts’ was not declared in this scope
+ ize", ge::AnyValue::CreateFrom<int64_t>(16)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:830:477: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:837:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:837:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:839:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:839:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:840:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:840:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:841:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:841:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:842:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:842:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:844:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:844:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:858:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_small_shapes) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_small_shapes_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:914:207: error: ‘send_counts’ was not declared in this scope
+ trs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:914:280: error: ‘recv_counts’ was not declared in this scope
+ size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:914:476: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:921:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:921:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:923:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:923:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:924:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:924:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:925:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:925:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:926:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:926:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:928:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:928:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:942:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_no_permute) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_no_permute_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:998:207: error: ‘send_counts’ was not declared in this scope
+ trs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:998:280: error: ‘recv_counts’ was not declared in this scope
+ size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:998:476: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1005:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1005:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1007:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1007:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1008:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1008:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1009:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1009:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1010:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1010:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1012:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1012:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1026:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_fp16_a5_path) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_a5_path_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1082:208: error: ‘send_counts’ was not declared in this scope
+ rs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(32)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1082:281: error: ‘recv_counts’ was not declared in this scope
+ ize", ge::AnyValue::CreateFrom<int64_t>(32)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1082:477: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1089:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1089:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1091:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1091:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1092:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1092:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1093:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1093:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1094:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1094:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1096:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1096:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: At global scope:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:1: error: expected class-name before ‘{’ token
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:8: error: ‘AlltoAllvGroupedMatMulTiling’ was not declared in this scope
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1110:1: error: template argument 1 is invalid
+ TEST_F(AlltoAllvGroupedMatMulTiling, alltoallv_gmm_bf16_boundary) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp: In member function ‘virtual void AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_boundary_Test::TestBody()’:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1166:208: error: ‘send_counts’ was not declared in this scope
+ rs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(64)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_count)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_counts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1166:281: error: ‘recv_counts’ was not declared in this scope
+ ize", ge::AnyValue::CreateFrom<int64_t>(64)}, {"send_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(send_counts)}, {"recv_counts", ge::AnyValue::CreateFrom<vector<int64_t>>(recv_count)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}})
+                                                                                                                                                                                  ^~~~~~~~~~
+
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1166:477: error: no matching function for call to ‘gert::TilingContextFaker::NodeAttrs(<brace-enclosed initializer list>)’
+ ts)}, {"trans_gmm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"trans_mm_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"permute_out_flag", ge::AnyValue::CreateFrom<bool>(false)}}
+                                                                                                                                                                                            
+
+In file included from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:11:
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note: candidate: ‘gert::TilingContextFaker& gert::TilingContextFaker::NodeAttrs(std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >)’
+   TilingContextFaker &NodeAttrs(std::vector<std::pair<std::string, ge::AnyValue>> keys_to_value) {
+                       ^~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/common/utils/kernel_run_context_facker.h:273:23: note:   no known conversion for argument 1 from ‘<brace-enclosed initializer list>’ to ‘std::vector<std::pair<std::basic_string<char>, ge::AnyValue> >’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1173:80: error: expected primary-expression before ‘>’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1173:82: error: expected primary-expression before ‘)’ token
+     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
+                                                                                  ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1175:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1175:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1176:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1176:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1177:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1177:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1178:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1178:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+                                            ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1180:42: error: expected primary-expression before ‘>’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                          ^
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:1180:44: error: expected primary-expression before ‘)’ token
+     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
+                                            ^
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_allto_allv_grouped_mat_mul.cpp:7:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_boundary_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_boundary_Test*’ to ‘testing::Test*’ in return
+   Test* CreateTest() override { return new TestClass; }
+                                            ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_a5_path_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_a5_path_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_no_permute_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_no_permute_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_small_shapes_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_small_shapes_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_large_mm_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_large_mm_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_both_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_both_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_trans_mm_w_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_bf16_trans_mm_w_Test*’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_gmm_w_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_trans_gmm_w_Test’ to ‘testing::Test*’ in return
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h: In instantiation of ‘testing::Test* testing::internal::TestFactoryImpl<TestClass>::CreateTest() [with TestClass = AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_basic_Test]’:
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:9:   required from here
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:460:44: error: cannot convert ‘AlltoAllvGroupedMatMulTiling_alltoallv_gmm_fp16_basic_Test*’ to testing::Test*’ in return
+make[3]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_allto_allv_grouped_mat_mul.cpp.o] Error 1
+[2025-09-17 15:33:27] ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/build.make:985: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_allto_allv_grouped_mat_mul.cpp.o' failed
+make[3]: *** Waiting for unfinished jobs....
+make[2]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/all] Error 2
+[2025-09-17 15:33:33] CMakeFiles/Makefile2:4002: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/all' failed
+make[1]: *** [ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/rule] Error 2
+[2025-09-17 15:33:33] CMakeFiles/Makefile2:4009: recipe for target 'ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/rule' failed
+make: *** [ops_cpp_op_tiling_utest] Error 2
+[2025-09-17 15:33:33] Makefile:417: recipe for target 'ops_cpp_op_tiling_utest' failed
+(base) root@ubuntu:/home/hwx1446482/canndev-master# 
