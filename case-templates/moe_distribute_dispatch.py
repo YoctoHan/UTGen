@@ -57,7 +57,7 @@ def render_test_case(op_name, spec, idx, helpers=None):
     ep_rank_id = getattr(spec, "ep_rank_id", 0)
     tp_rank_id = getattr(spec, "tp_rank_id", 0)
     expert_shard_type = getattr(spec, "expert_shard_type", 0)
-    shared_expert_num = getattr(spec, "shared_expert_num", 1)
+    shared_expert_num = getattr(spec, "shared_expert_num", 1) or 1
     shared_expert_rank_num = getattr(spec, "shared_expert_rank_num", 1)
     moe_expert_num = getattr(spec, "moe_expert_num", 8)
     quant_mode = getattr(spec, "quant_mode", 0)
@@ -67,6 +67,7 @@ def render_test_case(op_name, spec, idx, helpers=None):
     # 输出形状：按 UT 规则/经验推导，允许通过 spec 覆盖
     # 0: expand_x_output -> 使用 out 形状
     expand_x_out = getattr(spec, "expand_x_out", (out[0], out[1]))
+    scales_shape = getattr(spec, "scales_shape", (out[0], out[1]))
     # 1: dynamic_scales_output -> 一维，长度与 expand_x_out 的第一维一致
     dynamic_scales_len = getattr(spec, "dynamic_scales_len", expand_x_out[0])
     # 2: expand_idx_output -> 一维，等于 expert_ids 的元素数（B * topk）
@@ -139,6 +140,7 @@ def render_test_case(op_name, spec, idx, helpers=None):
     lines.append("    // 4. Define input/output shapes (dims 与 storage_dims 对齐)")
     lines.append(f"    gert::StorageShape expand_x_shape = <LB><LB>{x1[0]}, {x1[1]}<RB>, <LB>{x1[0]}, {x1[1]}<RB><RB>;")
     lines.append(f"    gert::StorageShape expert_ids_shape = <LB><LB>{x2[0]}, {x2[1]}<RB>, <LB>{x2[0]}, {x2[1]}<RB><RB>;")
+    lines.append(f"    gert::StorageShape scales_shape = <LB><LB>{scales_shape[0]}, {scales_shape[1]}<RB>, <LB>{scales_shape[0]}, {scales_shape[1]}<RB><RB>;")
     lines.append(f"    gert::StorageShape expand_x_output_shape = <LB><LB>{expand_x_out[0]}, {expand_x_out[1]}<RB>, <LB>{expand_x_out[0]}, {expand_x_out[1]}<RB><RB>;")
     lines.append(f"    gert::StorageShape dynamic_scales_output_shape = <LB><LB>{dynamic_scales_len}<RB>, <LB>{dynamic_scales_len}<RB><RB>;")
     lines.append(f"    gert::StorageShape expand_idx_output_shape = <LB><LB>{expand_idx_len}<RB>, <LB>{expand_idx_len}<RB><RB>;")
@@ -169,7 +171,7 @@ def render_test_case(op_name, spec, idx, helpers=None):
         f"<LB>\"quant_mode\", ge::AnyValue::CreateFrom<int64_t>({quant_mode})<RB>",
         f"<LB>\"global_bs\", ge::AnyValue::CreateFrom<int64_t>({global_bs})<RB>",
         f"<LB>\"expert_token_nums_type\", ge::AnyValue::CreateFrom<int64_t>({expert_token_nums_type})<RB>",
-    ]) + "><RB>")
+    ]) + "<RB>)")
     lines.append("                        .CompileInfo(&compile_info)")
     lines.append("                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))")
     lines.append(f"                        .NodeInputTd(0, ge::{{dt_in}}, ge::FORMAT_ND, ge::FORMAT_ND)")

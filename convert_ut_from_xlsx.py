@@ -71,6 +71,7 @@ def strip_all_testf_blocks(ut_content: str) -> str:
     i = 0
     while i < len(lines):
         line = lines[i]
+        print(line)
         if TEST_F_PATTERN.match(line):
             # 跳过到匹配的闭合花括号 '}'
             brace = 0
@@ -83,6 +84,7 @@ def strip_all_testf_blocks(ut_content: str) -> str:
                 if lb != -1:
                     brace += 1
                     rest = rest[lb + 1 :]
+                    i += 1
                     break
                 i += 1
                 if i >= len(lines):
@@ -96,6 +98,8 @@ def strip_all_testf_blocks(ut_content: str) -> str:
                         brace += 1
                     elif ch == '}':
                         brace -= 1
+                print(brace)
+                print(lines[i])
                 i += 1
             # 已跳过一个 TEST_F 块
             continue
@@ -275,6 +279,7 @@ class CaseSpec:
     x2_shape: Optional[Tuple[int, int]] = None
     gather_output_shape: Optional[Tuple[int, int]] = None
     output_shape: Optional[Tuple[int, int]] = None
+    scales_shape: Optional[Tuple[int, int]] = None
     # bias 长度（可选，若提供则覆盖默认 out_n）
     bias_len: Optional[int] = None
     # 额外字段（为各算子模板提供注入能力）
@@ -314,6 +319,7 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
     x2_shape = parse_shape(row.get("x2_shape") or row.get("expert_ids_shape")) or None
     go_shape = parse_shape(row.get("gather_output_shape") or row.get("gather_out_shape")) or None
     out_shape = parse_shape(row.get("output_shape")) or None
+    scales_shape = parse_shape(row.get("scales_shape")) or (8, 7168)
 
     # 如果提供了 input_tensor_shape（形如 [[M,K],[K,N],[N]]），优先使用
     inputs = parse_shape_list(row.get("input_tensor_shape"))
@@ -395,6 +401,7 @@ def row_to_case(row: Dict[str, Any], idx: int) -> CaseSpec:
         x2_shape=x2_shape,
         gather_output_shape=go_shape,
         output_shape=out_shape,
+        scales_shape=scales_shape,
         bias_len=bias_len,
         ep_world_size=ep_world_size,
         ep_rank_id=ep_rank_id,
@@ -797,5 +804,4 @@ def main():
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
 
