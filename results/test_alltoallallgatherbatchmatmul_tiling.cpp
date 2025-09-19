@@ -18,21 +18,21 @@
 #include "external/hcom/hcom_topo_info.h"
 #include "test_cube_util.h"
 
-class DistributeBarrierTiling : public testing::Test {
+class AlltoAllAllGatherBmmTiling : public testing::Test {
 protected:
     static void SetUpTestCase() {
-        std::cout << "DistributeBarrierTiling SetUp" << std::endl;
+        std::cout << "AlltoAllAllGatherBmmTiling SetUp" << std::endl;
     }
 
     static void TearDownTestCase() {
-        std::cout << "DistributeBarrierTiling TearDown" << std::endl;
+        std::cout << "AlltoAllAllGatherBmmTiling TearDown" << std::endl;
     }
 };
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_small) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -58,59 +58,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_small) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 2;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_medium) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -136,59 +140,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_medium) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 8;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_large) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_bfloat16_shard0_bias) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -214,59 +222,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_large) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 32;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeOutputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_min) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_bias) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -292,59 +304,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_min) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 2;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_max) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_gelu) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -370,59 +386,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_max) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 384;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_low) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_bfloat16_shard1_gelu) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -448,59 +468,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_low) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 1;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeOutputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_high) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_bias_gelu) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -526,59 +550,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_high) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 385;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_group_custom) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_bfloat16_shard1_bias_gelu) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -604,59 +632,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_group_custom) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 16;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeOutputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000000000);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_tiling_key_variation) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_y2_y3) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -682,59 +714,63 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_tiling_key_variation) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 64;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                         .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000002944);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_edge_case) {
+TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_bfloat16_shard1_y2_y3) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("AllToAllAllGatherBatchMatmul");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -760,52 +796,56 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_edge_case) {
     map<string, string> aicore_spec;
     map<string, string> intrinsics;
     GetPlatFormInfos(compile_info_string.c_str(), soc_infos, aicore_spec, intrinsics);
-    // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct AllGatherMatmulCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(4, 2)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
+    // 3. Create context
     auto param = gert::TilingData::CreateCap(4096);
     ASSERT_NE(param, nullptr);
     auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
-    // 3. Create context
-    std::string group("group");
-    int64_t world_size = 128;
+    gert::StorageShape x_shape = {{16, 128, 64}, {16, 128, 64}};
+    gert::StorageShape weight_shape = {{4, 64, 128}, {4, 64, 128}};
+    gert::StorageShape y1_output_shape = {{4, 512, 64}, {4, 512, 64}};
+    // 4. Build fake context
+    std::string ep_group("ep_group");
+    std::string tp_group("tp_group");
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
+                        .NodeIoNum(2, 1)
+                        .IrInstanceNum({1, 1})
+                        .InputShapes({&x_shape, &weight_shape})
+                        .OutputShapes({&y1_output_shape})
+                        .NodeAttrs({{"group_ep", ge::AnyValue::CreateFrom<std::string>(ep_group)}, {"group_tp", ge::AnyValue::CreateFrom<std::string>(tp_group)}, {"ep_world_size", ge::AnyValue::CreateFrom<int64_t>(4)}, {"tp_world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"x_shard_type", ge::AnyValue::CreateFrom<int64_t>(1)}, {"act_type", ge::AnyValue::CreateFrom<int64_t>(0)}, {"transpose_weight", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y2_flag", ge::AnyValue::CreateFrom<bool>(false)}, {"output_y3_flag", ge::AnyValue::CreateFrom<bool>(false)}})
                         .CompileInfo(&compile_info)
                         .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeInputTd(1, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
+                        .NodeOutputTd(0, DT_BF16, ge::FORMAT_ND, ge::FORMAT_ND)
                         .TilingData(param.get())
                         .Workspace(ws_size)
                         .Build();
-    // 4. Init TilingContext pointer
+    // 5. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
-    // 5. Call op function
+    ge::HcomTopoInfo::TopoInfo topoInfo;
+    topoInfo.rank_size = 8;
+    topoInfo.topo_level_descs[0].comm_sets = 0b1U;
+    ge::HcomTopoInfo::Instance().SetGroupTopoInfo(ep_group.c_str(), topoInfo);
+    // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
-    // 8. Check tiling key
+    // 11. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 1000000000000002944);
 }
 
