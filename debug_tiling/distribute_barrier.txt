@@ -1,0 +1,61 @@
+(base) root@ubuntu:/home/hwx1446482/canndev-master# build/cann/ops/built-in/tests/ut/op_tiling_test/ops_cpp_op_tiling_utest --gtest_filter=*DistributeBa*
+Note: Google Test filter = *DistributeBa*
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+Global Environment SetpUp.
+[----------] 10 tests from DistributeBarrierTiling
+DistributeBarrierTiling SetUp
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_basic_small
+[       OK ] DistributeBarrierTiling.distribute_barrier_basic_small (2 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_basic_medium
+[       OK ] DistributeBarrierTiling.distribute_barrier_basic_medium (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_basic_large
+[       OK ] DistributeBarrierTiling.distribute_barrier_basic_large (0 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_world_size_min
+[       OK ] DistributeBarrierTiling.distribute_barrier_world_size_min (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_world_size_max
+[       OK ] DistributeBarrierTiling.distribute_barrier_world_size_max (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_low
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_distribute_barrier.cpp:494: Failure
+Expected equality of these values:
+  tiling_func(tiling_context)
+    Which is: 4294967295
+  ge::GRAPH_SUCCESS
+    Which is: 0
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_distribute_barrier.cpp:497: Failure
+Expected equality of these values:
+  tiling_key
+    Which is: 0
+  10000
+[  FAILED  ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_low (39 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_high
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_distribute_barrier.cpp:572: Failure
+Expected equality of these values:
+  tiling_func(tiling_context)
+    Which is: 4294967295
+  ge::GRAPH_SUCCESS
+    Which is: 0
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_distribute_barrier.cpp:575: Failure
+Expected equality of these values:
+  tiling_key
+    Which is: 0
+  10000
+[  FAILED  ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_high (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_group_custom
+[       OK ] DistributeBarrierTiling.distribute_barrier_group_custom (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_tiling_key_variation
+[       OK ] DistributeBarrierTiling.distribute_barrier_tiling_key_variation (1 ms)
+[ RUN      ] DistributeBarrierTiling.distribute_barrier_edge_case
+[       OK ] DistributeBarrierTiling.distribute_barrier_edge_case (1 ms)
+DistributeBarrierTiling TearDown
+[----------] 10 tests from DistributeBarrierTiling (48 ms total)
+
+[----------] Global test environment tear-down
+Global Environment TearDown
+[==========] 10 tests from 1 test suite ran. (49 ms total)
+[  PASSED  ] 8 tests.
+[  FAILED  ] 2 tests, listed below:
+[  FAILED  ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_low
+[  FAILED  ] DistributeBarrierTiling.distribute_barrier_world_size_invalid_high
+
+ 2 FAILED TESTS
