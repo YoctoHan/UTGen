@@ -1,0 +1,65 @@
+[2025-09-24 18:58:54] [ 60%] Building CXX object ops/built-in/tests/ut/op_tiling_test/CMakeFiles/ops_cpp_op_tiling_utest.dir/test_moe_distribute_combine.cpp.o
+In file included from /home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/gtest.h:62,
+                 from /home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:6:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:1: error: expected class-name before ‘{’ token
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:33:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard0_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:1: error: expected class-name before ‘{’ token
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:1: error: no matching function for call to ‘GetTypeId<<expression error> >()’
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+ ^~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note: candidate: ‘template<class T> const void* testing::internal::GetTypeId()’
+ TypeId GetTypeId() {
+        ^~~~~~~~~
+/home/hwx1446482/Ascend/latest/opensdk/opensdk/gtest/include/gtest/internal/gtest-internal.h:423:8: note:   template argument deduction/substitution failed:
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+ ^~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: error: ‘AllToAllAllGatherBatchMatmulTiling’ was not declared in this scope
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+        ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:8: note: suggested alternative: ‘AlltoAllAllGatherBmmTiling’
+/home/hwx1446482/canndev-master/ops/built-in/tests/ut/op_tiling_test/test_all_to_all_all_gather_batch_matmul.cpp:115:1: error: template argument 1 is invalid
+ TEST_F(AllToAllAllGatherBatchMatmulTiling, all_to_all_all_gather_bmm_float16_shard1_basic) {
+ ^~~~~~
