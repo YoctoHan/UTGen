@@ -336,9 +336,9 @@ INSTANTIATE_TEST_SUITE_P(MoeDistributeCombineAddRmsNormTilingTest, MoeDistribute
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_bf16_1) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_basic_fp16_1) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -382,11 +382,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_bf16_1
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -398,7 +398,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_bf16_1
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -428,17 +428,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_bf16_1
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 11100);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_fp16_1) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_basic_bf16) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -482,11 +484,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_fp16_1
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -498,7 +500,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_fp16_1
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -528,17 +530,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_basic_fp16_1
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_large_bf16) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_large_shape) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -582,11 +586,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_large_bf16) 
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -598,7 +602,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_large_bf16) 
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -628,17 +632,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_large_bf16) 
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10100);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_shared_expert) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_small_shape) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -682,11 +688,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_shared_exper
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -698,7 +704,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_shared_exper
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -728,17 +734,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_shared_exper
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 11000);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_min_k) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_boundary_min) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -782,11 +790,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_min_k) {
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -798,7 +806,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_min_k) {
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -828,17 +836,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_min_k) {
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10100);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_max_k) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_transposed_b) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -882,11 +892,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_max_k) {
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -898,7 +908,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_max_k) {
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -928,17 +938,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_max_k) {
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_min) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_no_bias) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -982,11 +994,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -998,7 +1010,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -1028,17 +1040,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 110);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_max) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_large_k) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -1082,11 +1096,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -1098,7 +1112,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -1128,17 +1142,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_boundary_h_m
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10100);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_active_mask) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_large_n) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -1182,11 +1198,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_active_mask)
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -1198,7 +1214,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_active_mask)
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -1228,17 +1244,19 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_active_mask)
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 111);
 }
 
 
-TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_tp_world_size_2) {
+TEST_F(MoeDistributeCombineAddRMSNormTiling, moe_distribute_combine_add_rms_norm_4p_world_size) {
     // 1. Setup interfaces
-    std::string op_type("MoeDistributeCombineAddRmsNorm");
+    std::string op_type("MoeDistributeCombineAddRMSNorm");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -1282,11 +1300,11 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_tp_world_siz
     gert::StorageShape expand_x_shape = {{64, 7168}, {64, 7168}};
     gert::StorageShape expert_ids_shape = {{8, 8}, {8, 8}};
     gert::StorageShape assist_info_shape = {{8192}, {8192}};
-    gert::StorageShape ep_send_counts_shape = {{8}, {8}};
+    gert::StorageShape ep_send_counts_shape = {{None}, {None}};
     gert::StorageShape expert_scales_shape = {{8, 8}, {8, 8}};
     gert::StorageShape residual_x_shape = {{8, 1, 7168}, {8, 1, 7168}};
     gert::StorageShape gamma_shape = {{7168}, {7168}};
-    gert::StorageShape tp_send_counts_shape = {{1}, {1}};
+    gert::StorageShape tp_send_counts_shape = {{None}, {None}};
     gert::StorageShape x_active_mask_shape = {{8}, {8}};
     gert::StorageShape shared_expert_x_shape = {{8, 7168}, {8, 7168}};
     gert::StorageShape y_shape = {{8, 1, 7168}, {8, 1, 7168}};
@@ -1298,7 +1316,7 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_tp_world_siz
                       .IrInstanceNum({1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1})
                       .InputShapes({&expand_x_shape, &expert_ids_shape, &assist_info_shape, &ep_send_counts_shape, &expert_scales_shape, &residual_x_shape, &gamma_shape, &tp_send_counts_shape, &x_active_mask_shape, nullptr, nullptr, nullptr, nullptr, &shared_expert_x_shape})
                       .OutputShapes({&y_shape, &rstd_shape, &x_shape})
-                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("group_ep"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(8)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("group_tp"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(1)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(0)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}>})
+                      .NodeAttrs({{\"group_ep\", ge::AnyValue::CreateFrom<std::string>(std::string("ep_group"))}, {\"ep_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"ep_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"moe_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_tp\", ge::AnyValue::CreateFrom<std::string>(std::string("tp_group"))}, {\"tp_world_size\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"tp_rank_id\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"expert_shard_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"shared_expert_rank_num\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"global_bs\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"out_dtype\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_quant_mode\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"group_list_type\", ge::AnyValue::CreateFrom<int64_t>(None)}, {\"comm_alg\", ge::AnyValue::CreateFrom<std::string>(std::string(""))}, {\"norm_eps\", ge::AnyValue::CreateFrom<float>(1e-06)}})
                       .CompileInfo(&compile_info)
                       .PlatformInfo(reinterpret_cast<char*>(&platform_info))
                       .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
@@ -1328,10 +1346,12 @@ TEST_F(MoeDistributeCombineAddRmsNormTiling, moe_distribute_combine_tp_world_siz
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreintrinsicDtypeMap", intrinsics);
+    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
+    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     // 6. Call op function
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 10. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10100);
+    ASSERT_EQ(tiling_key, 111);
 }
 
