@@ -1,38 +1,9 @@
-#include <iostream>
-#include <map>
-#include <vector>
-#include <string>
-
-#include <gtest/gtest.h>
-#include "op_log.h"
-#define private public
-
-#include "kernel_run_context_facker.h"
-
-#include "fusion_ops.h"
-#include "op_tiling/op_tiling_util.h"
-#include "common/utils/ut_op_util.h"
-#include "common_unittest.h"
-#include "exe_graph/runtime/storage_format.h"
-#include "exe_graph/runtime/storage_shape.h"
-#include "external/hcom/hcom_topo_info.h"
-#include "test_cube_util.h"
-
-class DistributeBarrierTiling : public testing::Test {
-protected:
-    static void SetUpTestCase() {
-        std::cout << "DistributeBarrierTiling SetUp" << std::endl;
-    }
-
-    static void TearDownTestCase() {
-        std::cout << "DistributeBarrierTiling TearDown" << std::endl;
-    }
-};
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_small) {
+
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_basic_int32) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -61,41 +32,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_small) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 2;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -104,13 +73,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_small) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_medium) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_basic_int64) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -139,41 +108,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_medium) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 8;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -182,13 +149,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_medium) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_basic_large) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_max_bs_k) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -217,41 +184,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_large) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 32;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(32)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -260,13 +225,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_basic_large) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_min) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_min_bs_k) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -295,41 +260,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_min) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 2;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(2)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -338,13 +301,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_min) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_max) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_boundary_f) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -373,41 +336,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_max) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 384;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(1)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -416,13 +377,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_max) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_low) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_large_world_size) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -451,41 +412,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_low) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 1;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(128)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -494,13 +453,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_low) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_high) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_middle_shape) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -529,41 +488,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_high) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 385;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -572,13 +529,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_world_size_invalid_high) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_group_custom) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_dtype_mismatch) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -607,41 +564,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_group_custom) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 16;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -650,13 +605,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_group_custom) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_tiling_key_variation) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_single_expert) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -685,41 +640,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_tiling_key_variation) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 64;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(1)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -728,13 +681,13 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_tiling_key_variation) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
 
-TEST_F(DistributeBarrierTiling, distribute_barrier_edge_case) {
+TEST_F(MoeEPLBUpdateExpertTilingTiling, moe_eplb_update_expert_large_k) {
     // 1. Setup interfaces
-    std::string op_type("DistributeBarrier");
+    std::string op_type("MoeEPLBUpdateExpertTiling");
     ASSERT_NE(gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str()), nullptr);
     auto tiling_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling;
     auto tiling_parse_func = gert::OpImplRegistry::GetInstance().GetOpImpl(op_type.c_str())->tiling_parse;
@@ -763,41 +716,39 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_edge_case) {
     // platform info
     fe::PlatFormInfos platform_info;
     platform_info.Init();
-    struct DistributeBarrierCompileInfo {} compile_info;
+    struct MoeEPLBUpdateExpertCompileInfo {} compile_info;
     // tilingParseFunc simulate
     auto kernel_holder =
         gert::KernelRunContextFaker()
-            .KernelIONum(1, 1)
+            .KernelIONum(2, 1)
             .Inputs({const_cast<char*>(compile_info_string.c_str()), reinterpret_cast<void*>(&platform_info)})
             .Outputs({&compile_info})
             .Build();
-    auto param = gert::TilingData::CreateCap(4096);
+    auto param = gert::TilingData::CreateCap(8192);
     ASSERT_NE(param, nullptr);
-    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(4096);
+    auto workspace_size_holer = gert::ContinuousVector::Create<size_t>(8192);
     auto ws_size = reinterpret_cast<gert::ContinuousVector*>(workspace_size_holer.get());
-    gert::StorageShape x_ref_shape = {{3, 4}, {3, 4}};
-    gert::StorageShape x_ref_output_shape = {{3, 4}, {3, 4}};
+    gert::StorageShape expertIds_shape = {{128, 8}, {128, 8}};
+    gert::StorageShape eplbTable_shape = {{256, 5}, {256, 5}};
+    gert::StorageShape balancedExpertIds_shape = {{128, 8}, {128, 8}};
     // 3. Create context
-    std::string group("group");
-    int64_t world_size = 128;
     auto holder = gert::TilingContextFaker()
-                        .NodeIoNum(1, 1)
-                        .IrInstanceNum({1})
-                        .InputShapes({&x_ref_shape})
-                        .OutputShapes({&x_ref_output_shape})
-                        .NodeAttrs({{"group", ge::AnyValue::CreateFrom<std::string>(group)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(world_size)}})
-                        .CompileInfo(&compile_info)
-                        .PlatformInfo(reinterpret_cast<char*>(&platform_info))
-                        .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
-                        .TilingData(param.get())
-                        .Workspace(ws_size)
-                        .Build();
+                      .NodeIoNum(2, 1)
+                      .IrInstanceNum({1, 1})
+                      .InputShapes({&expertIds_shape, &eplbTable_shape})
+                      .OutputShapes({&balancedExpertIds_shape})
+                      .NodeAttrs({{"local_rank_id", ge::AnyValue::CreateFrom<int64_t>(0)}, {"world_size", ge::AnyValue::CreateFrom<int64_t>(8)}, {"balance_mode", ge::AnyValue::CreateFrom<int64_t>(0)}})
+                      .CompileInfo(&compile_info)
+                      .PlatformInfo(reinterpret_cast<char*>(&platform_info))
+                      .NodeInputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeInputTd(1, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .NodeOutputTd(0, DT_FLOAT16, ge::FORMAT_ND, ge::FORMAT_ND)
+                      .TilingData(param.get())
+                      .Workspace(ws_size)
+                      .Build();
     // 4. Init TilingContext pointer
     gert::TilingContext* tiling_context = holder.GetContext<gert::TilingContext>();
     ASSERT_NE(tiling_context->GetPlatformInfo(), nullptr);
-    map<string, string> version = {{"Short_SoC_version", "ascend910b"}};
-    holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("version", version);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("SoCInfo", soc_infos);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetPlatformRes("AICoreSpec", aicore_spec);
     holder.GetContext<gert::TilingContext>()->GetPlatformInfo()->SetCoreNumByCoreType("AICore");
@@ -806,6 +757,6 @@ TEST_F(DistributeBarrierTiling, distribute_barrier_edge_case) {
     EXPECT_EQ(tiling_func(tiling_context), ge::GRAPH_SUCCESS);
     // 8. Check tiling key
     auto tiling_key = tiling_context->GetTilingKey();
-    ASSERT_EQ(tiling_key, 10000);
+    ASSERT_EQ(tiling_key, 100);
 }
 
